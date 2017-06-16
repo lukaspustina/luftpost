@@ -1,0 +1,38 @@
+[package]
+name = "luftpost"
+version = "0.0.1"
+authors = ["Lukas Pustina <lukas@pustina.net>"]
+
+description = "Watches luftdaten.info particulates sensors and sends E-Mails if measurements exceed thresholds"
+repository = "https://github.com/lukaspustina/luftpost"
+readme = "README.md"
+license = "MIT"
+keywords = ["luftdaten", "E-Mail"]
+include = [
+  "README.md",
+  "LICENSE",
+  "**/*.rs",
+  "Cargo.toml",
+]
+
+[badges]
+travis-ci = { repository = "lukaspustina/luftdaten", branch = "master" }
+appveyor = { repository = "lukaspustina/luftdaten", branch = "master" }
+
+[[bin]]
+name = "luftdaten"
+path = "src/main.rs"
+
+[dependencies]
+clap = "2"
+error-chain = "0.10"
+hyper = "0.10.5"
+lettre = "0.6"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+tabwriter = "1.0"
+toml = "0.3"
+
+[dev-dependencies]
+pretty_assertions = "0.1"

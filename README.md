@@ -1,2 +1,59 @@
 # luftpost
-Watches luftdaten.info particulates sensors and sends E-Mails if measurements exceed thresholds 
+
+[![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/luftpost.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/luftpost) [![Windows Build status](https://img.shields.io/appveyor/ci/lukaspustina/luftpost.svg?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/lukaspustina/luftpost/branch/master) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE) [![](http://meritbadge.herokuapp.com/luftpost)](https://cluftpostes.io/cluftpostes/luftpost)
+
+Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E-Mails if measurements exceed thresholds
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Todos](#todos)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Todos
+
+* [ ] Features
+
+    * [ ] Read measurement from multiple sensors by id
+
+    * [ ] Clap: config file, just read measurements
+
+    * [ ] Read config file
+
+        * [ ] Sensors
+
+        * [ ] Threshold by sensor
+
+        * [ ] Default threshold
+
+        * [ ] E-Mail: receipient, subjects
+
+        * [ ] E-Mail Options: exceed, no-data, okay
+
+    * [ ]
+
+* [ ] Infrastructure
+
+    * [ ] Travis CI, appveyor
+
+    * [ ] Travis: Cross compile for ARM
+
+    * [ ] Travis: Build Debian packages (x86, ARM)
+
+      https://github.com/travis-ci/travis-ci/issues/3376
+
+
+* [ ] Milestone 0.1
+
+    * [ ] Readme
+
+    * [ ] Ansible Role
+
+    * [ ] brew recipe
+
+* [ ] Milestone 0.2
+
+    * HTML E-Mails with template engine
+
