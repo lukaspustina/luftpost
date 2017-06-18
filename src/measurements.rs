@@ -51,7 +51,7 @@ impl<'a> From<&'a str> for ValueType {
 }
 
 
-fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
+pub fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
     let mut data_values = HashMap::new();
 
     for dv in wire.data_values {
@@ -147,7 +147,7 @@ mod test {
     }
 }
 
-mod wire {
+pub mod wire {
     use serde_json;
 
     error_chain! {
@@ -172,7 +172,7 @@ mod wire {
         pub value: String
     }
 
-    fn decode_json_to_measurement<T: Into<String>>(json: T) -> Result<Measurement> {
+    pub fn decode_json_to_measurement<T: Into<String>>(json: T) -> Result<Measurement> {
         let json_string = json.into();
         let m: Measurement = serde_json::from_str(&json_string).chain_err(|| ErrorKind::InvalidJson(json_string))?;
 
