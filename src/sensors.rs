@@ -2,7 +2,8 @@ use measurements;
 use measurements::{Measurement, wire_to_measurement};
 use measurements::wire::decode_json_to_measurement;
 use futures::{Future, Stream};
-use hyper::{Client, Uri};
+use hyper::Client;
+use hyper::client::{FutureResponse, HttpConnector};
 use std::str;
 use tokio_core::reactor::Core;
 
@@ -21,17 +22,20 @@ error_chain! {
     }
 }
 
-pub fn read_measurement(uri: Uri, core: &mut Core) -> Result<Measurement> {
-    let client = Client::new(&core.handle());
+pub fn create_client(core: &mut Core) -> Client<HttpConnector> {
+    Client::new(&core.handle())
+}
 
-    let work = client.get(uri).and_then(|res| {
+pub fn read_measurement(response: FutureResponse) -> Box<Future<Item=Measurement, Error=Error>> {
+    let m = response.and_then(|res| {
         res.body().concat2()
     }).map(|body| {
         let json = str::from_utf8(&body)?;
         let wire = decode_json_to_measurement(json)?;
         wire_to_measurement(wire).map_err(|e| e.into())
-    });
-    core.run(work)?
+    }).map_err(|e| e.into())
+    .and_then(|x| x);
+    Box::new(m)
 }
 
 #[cfg(test)]
@@ -42,9 +46,11 @@ mod test {
     #[test]
     fn read_measurement_local() -> () {
         let mut core = Core::new().unwrap();
-        let uri = "http://192.168.179.25/data.json".parse().unwrap();
 
-        let res = read_measurement(uri, &mut core).unwrap();
+        let uri = "http://feinstaub/data.json".parse().unwrap();
+        let request = create_client(&mut core).get(uri);
+        let work = read_measurement(request);
+        let res = core.run(work).unwrap();
 
         assert!(res.data_values.contains_key(&ValueType::SDS_P1));
         assert!(res.data_values.contains_key(&ValueType::SDS_P2));
