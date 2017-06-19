@@ -16,7 +16,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
 * [ ] Features
 
-    * [ ] Read measurement from multiple sensors by id
+    * [X] Read measurement from multiple local sensors by id
 
     * [ ] Clap: config file, just read measurements
 

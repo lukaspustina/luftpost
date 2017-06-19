@@ -3,7 +3,7 @@ fmt:
 	rustup run nightly cargo fmt -- --write-mode overwrite
 
 unit:
-	cargo test --lib
+	cargo test --lib --no-fail-fast
 
 integration:
 	cargo test
