@@ -18,7 +18,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Read measurement from multiple local sensors by id
 
-    * [ ] Clap: config file, just read measurements
+    * [X] Clap: config file, just read measurements
 
     * [X] Read config file
 
@@ -31,6 +31,10 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
         * [X] E-Mail: receipient, subjects
 
         * [X] E-Mail Options: exceed, no-data, okay
+
+    * [ ] Print Measurement data to terminal
+
+    * [ ] Send E-Mails
 
 * [ ] Infrastructure
 
