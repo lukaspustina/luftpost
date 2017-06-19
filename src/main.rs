@@ -42,7 +42,7 @@ fn run() -> Result<i32> {
 }
 
 fn build_cli() -> App<'static, 'static> {
-    let app = App::new("luftpost")
+    App::new("luftpost")
         .version(VERSION)
         .about("Reads luftdaten.info particle matter sensors and alarms by email if measurements exceed thresholds.")
         .arg(Arg::with_name("config-file")
@@ -63,8 +63,6 @@ fn build_cli() -> App<'static, 'static> {
              .takes_value(true)
              .hidden(true)
              .possible_values(&["bash", "fish", "zsh"])
-             .help("The shell to generate the script for"));
-
-    app
+             .help("The shell to generate the script for"))
 }
 

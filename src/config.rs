@@ -67,7 +67,7 @@ impl Config {
     }
 
     fn parse_toml(content: &str) -> Result<Config> {
-        let config: Config = toml::from_str(&content)?;
+        let config: Config = toml::from_str(content)?;
 
         let config = Config::set_defaults(config);
 
@@ -79,10 +79,10 @@ impl Config {
         let threshold_pm2 = config.defaults.threshold_pm2.or(Some(50.0));
         let e_mail_addr = config.defaults.e_mail_addr;
         let e_mail_subject = config.defaults.e_mail_subject;
-        let e_mail_condition = if config.defaults.e_mail_condition.len() > 0 {
-            config.defaults.e_mail_condition
-        } else {
+        let e_mail_condition = if config.defaults.e_mail_condition.is_empty() {
             vec![EmailCondition::Threshold]
+        } else {
+            config.defaults.e_mail_condition
         };
 
         let sensors = config
@@ -91,12 +91,12 @@ impl Config {
             .map(|s| {
                 let s_threshold_pm10 = s.threshold_pm10.or(threshold_pm10);
                 let s_threshold_pm2 = s.threshold_pm2.or(threshold_pm2);
-                let s_e_mail_addr = s.e_mail_addr.or(e_mail_addr.clone());
-                let s_e_mail_subject = s.e_mail_subject.or(e_mail_subject.clone());
-                let s_e_mail_condition = if s.e_mail_condition.len() > 0 {
-                    s.e_mail_condition
-                } else {
+                let s_e_mail_addr = s.e_mail_addr.or_else(|| e_mail_addr.clone());
+                let s_e_mail_subject = s.e_mail_subject.or_else(|| e_mail_subject.clone());
+                let s_e_mail_condition = if s.e_mail_condition.is_empty() {
                     e_mail_condition.clone()
+                } else {
+                    s.e_mail_condition
                 };
                 Sensor {
                     threshold_pm10: s_threshold_pm10,
@@ -115,7 +115,6 @@ impl Config {
             e_mail_addr: e_mail_addr,
             e_mail_subject: e_mail_subject,
             e_mail_condition: e_mail_condition,
-            ..config.defaults
         };
         Config {
             defaults: defaults,

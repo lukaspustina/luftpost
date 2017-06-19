@@ -68,7 +68,7 @@ fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
             .chain_err(|| ErrorKind::InvalidValue(value_str.to_string()))?;
         match ValueType::from(&dv.value_type[..]) {
             ValueType::UNKNOWN(str) => bail!(ErrorKind::InvalidValueType(str)),
-            vt @ _ => {
+            vt => {
                 data_values.insert(vt, value);
             }
         }
