@@ -11,6 +11,9 @@ error_chain! {
                 display("invalid value: '{}'", value_str)
         }
     }
+    links {
+        WireMeasurementDecodingFailed(wire::Error, wire::ErrorKind);
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -50,8 +53,12 @@ impl<'a> From<&'a str> for ValueType {
     }
 }
 
+pub fn measurement_from_json(json: &str) -> Result<Measurement> {
+    let wire_measurement = wire::decode_json_to_measurement(json)?;
+    wire_to_measurement(wire_measurement)
+}
 
-pub fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
+fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
     let mut data_values = HashMap::new();
 
     for dv in wire.data_values {
@@ -94,7 +101,7 @@ mod test {
         assert_eq!(
             ValueType::UNKNOWN("does not exists".to_string()),
             "does not exists".into()
-        );
+            );
     }
 
     #[test]
@@ -132,7 +139,7 @@ mod test {
                 value_type: "signal".to_string(),
                 value: "-73".to_string(),
             },
-        ];
+            ];
         let wire = wire::Measurement {
             software_version: "NRZ-2017-089".to_string(),
             data_values: w_data_values,
@@ -200,7 +207,7 @@ mod test {
     }
 }
 
-pub mod wire {
+mod wire {
     use serde_json;
 
     error_chain! {
@@ -275,7 +282,7 @@ pub mod wire {
                     value_type: "signal".to_string(),
                     value: "-73".to_string(),
                 },
-            ];
+                ];
             let expected = Measurement {
                 software_version: "NRZ-2017-089".to_string(),
                 data_values: data_values,
