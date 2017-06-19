@@ -56,14 +56,21 @@ pub fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
 
     for dv in wire.data_values {
         let value_str = dv.value;
-        let value = value_str.parse::<f32>().chain_err(|| ErrorKind::InvalidValue(value_str.to_string()))?;
+        let value = value_str
+            .parse::<f32>()
+            .chain_err(|| ErrorKind::InvalidValue(value_str.to_string()))?;
         match ValueType::from(&dv.value_type[..]) {
             ValueType::UNKNOWN(str) => bail!(ErrorKind::InvalidValueType(str)),
-            vt@_ => { data_values.insert(vt, value); }
+            vt @ _ => {
+                data_values.insert(vt, value);
+            }
         }
     }
 
-    Ok(Measurement { software_version: wire.software_version, data_values: data_values })
+    Ok(Measurement {
+        software_version: wire.software_version,
+        data_values: data_values,
+    })
 }
 
 #[cfg(test)]
@@ -84,21 +91,52 @@ mod test {
 
     #[test]
     fn value_type_from_str_unknown() -> () {
-        assert_eq!(ValueType::UNKNOWN("does not exists".to_string()), "does not exists".into());
+        assert_eq!(
+            ValueType::UNKNOWN("does not exists".to_string()),
+            "does not exists".into()
+        );
     }
 
     #[test]
     fn wire_to_measurement_ok() -> () {
         let w_data_values: Vec<wire::DataValue> = vec![
-            wire::DataValue { value_type: "SDS_P1".to_string(), value: "7.87".to_string() },
-            wire::DataValue { value_type: "SDS_P2".to_string(), value: "3.17".to_string() },
-            wire::DataValue { value_type: "temperature".to_string(), value: "18.90".to_string() },
-            wire::DataValue { value_type: "humidity".to_string(), value: "49.10".to_string() },
-            wire::DataValue { value_type: "samples".to_string(), value: "739514".to_string() },
-            wire::DataValue { value_type: "min_micro".to_string(), value: "192".to_string() },
-            wire::DataValue { value_type: "max_micro".to_string(), value: "27599".to_string() },
-            wire::DataValue { value_type: "signal".to_string(), value: "-73".to_string() }];
-        let wire = wire::Measurement { software_version: "NRZ-2017-089".to_string(), data_values: w_data_values };
+            wire::DataValue {
+                value_type: "SDS_P1".to_string(),
+                value: "7.87".to_string(),
+            },
+            wire::DataValue {
+                value_type: "SDS_P2".to_string(),
+                value: "3.17".to_string(),
+            },
+            wire::DataValue {
+                value_type: "temperature".to_string(),
+                value: "18.90".to_string(),
+            },
+            wire::DataValue {
+                value_type: "humidity".to_string(),
+                value: "49.10".to_string(),
+            },
+            wire::DataValue {
+                value_type: "samples".to_string(),
+                value: "739514".to_string(),
+            },
+            wire::DataValue {
+                value_type: "min_micro".to_string(),
+                value: "192".to_string(),
+            },
+            wire::DataValue {
+                value_type: "max_micro".to_string(),
+                value: "27599".to_string(),
+            },
+            wire::DataValue {
+                value_type: "signal".to_string(),
+                value: "-73".to_string(),
+            },
+        ];
+        let wire = wire::Measurement {
+            software_version: "NRZ-2017-089".to_string(),
+            data_values: w_data_values,
+        };
 
         let mut data_values = HashMap::new();
         data_values.insert(ValueType::SDS_P1, 7.87f32);
@@ -109,7 +147,10 @@ mod test {
         data_values.insert(ValueType::MIN_MICRO, 192f32);
         data_values.insert(ValueType::MAX_MICRO, 27599f32);
         data_values.insert(ValueType::SIGNAL, -73f32);
-        let expected = Measurement { software_version: "NRZ-2017-089".to_string(), data_values: data_values };
+        let expected = Measurement {
+            software_version: "NRZ-2017-089".to_string(),
+            data_values: data_values,
+        };
 
         let m = wire_to_measurement(wire);
 
@@ -119,9 +160,15 @@ mod test {
     #[test]
     fn wire_to_measurement_unknown_value_type() -> () {
         let w_data_values: Vec<wire::DataValue> = vec![
-            wire::DataValue { value_type: "this data type does not exists".to_string(), value: "7.87".to_string() },
+            wire::DataValue {
+                value_type: "this data type does not exists".to_string(),
+                value: "7.87".to_string(),
+            },
         ];
-        let wire = wire::Measurement { software_version: "NRZ-2017-089".to_string(), data_values: w_data_values };
+        let wire = wire::Measurement {
+            software_version: "NRZ-2017-089".to_string(),
+            data_values: w_data_values,
+        };
 
         let res = wire_to_measurement(wire);
 
@@ -134,9 +181,15 @@ mod test {
     #[test]
     fn wire_to_measurement_invalid_value() -> () {
         let w_data_values: Vec<wire::DataValue> = vec![
-            wire::DataValue { value_type: "SDS_P1".to_string(), value: "invalid float".to_string() },
+            wire::DataValue {
+                value_type: "SDS_P1".to_string(),
+                value: "invalid float".to_string(),
+            },
         ];
-        let wire = wire::Measurement { software_version: "NRZ-2017-089".to_string(), data_values: w_data_values };
+        let wire = wire::Measurement {
+            software_version: "NRZ-2017-089".to_string(),
+            data_values: w_data_values,
+        };
 
         let res = wire_to_measurement(wire);
 
@@ -163,18 +216,20 @@ pub mod wire {
     #[derive(Deserialize, Debug, PartialEq)]
     pub struct Measurement {
         pub software_version: String,
-        #[serde(rename(deserialize = "sensordatavalues"))] pub data_values: Vec<DataValue>,
+        #[serde(rename(deserialize = "sensordatavalues"))]
+        pub data_values: Vec<DataValue>,
     }
 
     #[derive(Deserialize, Debug, PartialEq)]
     pub struct DataValue {
         pub value_type: String,
-        pub value: String
+        pub value: String,
     }
 
     pub fn decode_json_to_measurement<T: Into<String>>(json: T) -> Result<Measurement> {
         let json_string = json.into();
-        let m: Measurement = serde_json::from_str(&json_string).chain_err(|| ErrorKind::InvalidJson(json_string))?;
+        let m: Measurement = serde_json::from_str(&json_string)
+            .chain_err(|| ErrorKind::InvalidJson(json_string))?;
 
         Ok(m)
     }
@@ -188,15 +243,43 @@ pub mod wire {
         fn decode_json_to_measurement_ok() -> () {
             let json = r#"{"software_version": "NRZ-2017-089", "sensordatavalues":[{"value_type":"SDS_P1","value":"7.87"},{"value_type":"SDS_P2","value":"3.17"},{"value_type":"temperature","value":"18.90"},{"value_type":"humidity","value":"49.10"},{"value_type":"samples","value":"739514"},{"value_type":"min_micro","value":"192"},{"value_type":"max_micro","value":"27599"},{"value_type":"signal","value":"-73"}]}"#;
             let data_values: Vec<DataValue> = vec![
-                DataValue { value_type: "SDS_P1".to_string(), value: "7.87".to_string() },
-                DataValue { value_type: "SDS_P2".to_string(), value: "3.17".to_string() },
-                DataValue { value_type: "temperature".to_string(), value: "18.90".to_string() },
-                DataValue { value_type: "humidity".to_string(), value: "49.10".to_string() },
-                DataValue { value_type: "samples".to_string(), value: "739514".to_string() },
-                DataValue { value_type: "min_micro".to_string(), value: "192".to_string() },
-                DataValue { value_type: "max_micro".to_string(), value: "27599".to_string() },
-                DataValue { value_type: "signal".to_string(), value: "-73".to_string() }];
-            let expected = Measurement { software_version: "NRZ-2017-089".to_string(), data_values: data_values };
+                DataValue {
+                    value_type: "SDS_P1".to_string(),
+                    value: "7.87".to_string(),
+                },
+                DataValue {
+                    value_type: "SDS_P2".to_string(),
+                    value: "3.17".to_string(),
+                },
+                DataValue {
+                    value_type: "temperature".to_string(),
+                    value: "18.90".to_string(),
+                },
+                DataValue {
+                    value_type: "humidity".to_string(),
+                    value: "49.10".to_string(),
+                },
+                DataValue {
+                    value_type: "samples".to_string(),
+                    value: "739514".to_string(),
+                },
+                DataValue {
+                    value_type: "min_micro".to_string(),
+                    value: "192".to_string(),
+                },
+                DataValue {
+                    value_type: "max_micro".to_string(),
+                    value: "27599".to_string(),
+                },
+                DataValue {
+                    value_type: "signal".to_string(),
+                    value: "-73".to_string(),
+                },
+            ];
+            let expected = Measurement {
+                software_version: "NRZ-2017-089".to_string(),
+                data_values: data_values,
+            };
 
             let res = decode_json_to_measurement(json);
 
