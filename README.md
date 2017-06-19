@@ -20,19 +20,17 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [ ] Clap: config file, just read measurements
 
-    * [ ] Read config file
+    * [X] Read config file
 
-        * [ ] Sensors
+        * [X] Sensors
 
-        * [ ] Threshold by sensor
+        * [X] Threshold by sensor
 
-        * [ ] Default threshold
+        * [X] Default threshold
 
-        * [ ] E-Mail: receipient, subjects
+        * [X] E-Mail: receipient, subjects
 
-        * [ ] E-Mail Options: exceed, no-data, okay
-
-    * [ ]
+        * [X] E-Mail Options: exceed, no-data, okay
 
 * [ ] Infrastructure
 
@@ -54,6 +52,8 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
     * [ ] brew recipe
 
 * [ ] Milestone 0.2
+
+    * Progress bar for terminal operation
 
     * HTML E-Mails with template engine
 
