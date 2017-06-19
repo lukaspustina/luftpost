@@ -1,0 +1,6 @@
+[defaults]
+
+[[sensors]]
+name = "Feinstaub"
+uri = "http://feinstaub/data.json"
+
