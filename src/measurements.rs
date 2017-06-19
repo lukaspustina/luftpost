@@ -101,7 +101,7 @@ mod test {
         assert_eq!(
             ValueType::UNKNOWN("does not exists".to_string()),
             "does not exists".into()
-            );
+        );
     }
 
     #[test]
@@ -139,7 +139,7 @@ mod test {
                 value_type: "signal".to_string(),
                 value: "-73".to_string(),
             },
-            ];
+        ];
         let wire = wire::Measurement {
             software_version: "NRZ-2017-089".to_string(),
             data_values: w_data_values,
@@ -282,7 +282,7 @@ mod wire {
                     value_type: "signal".to_string(),
                     value: "-73".to_string(),
                 },
-                ];
+            ];
             let expected = Measurement {
                 software_version: "NRZ-2017-089".to_string(),
                 data_values: data_values,

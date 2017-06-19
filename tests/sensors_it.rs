@@ -25,4 +25,3 @@ fn read_measurement_local() -> () {
     assert!(res.data_values.contains_key(&ValueType::MAX_MICRO));
     assert!(res.data_values.contains_key(&ValueType::SIGNAL));
 }
-
