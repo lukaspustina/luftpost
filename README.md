@@ -34,6 +34,8 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Print Measurement data to terminal
 
+    * [ ] Check thresholds
+
     * [ ] Send E-Mails
 
 * [ ] Infrastructure

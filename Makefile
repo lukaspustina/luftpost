@@ -1,8 +1,13 @@
-all:
-	cat Makefile | grep '^[a-z]' | tr -d ':' | awk '{ print $$1 }'
+all: check unit integration
+
+check:
+	cargo $@
+
+build:
+	cargo $@
 
 clean:
-	cargo clean
+	cargo $@
 
 fmt:
 	rustup run nightly cargo fmt -- --write-mode overwrite
