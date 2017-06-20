@@ -2,6 +2,7 @@
 extern crate error_chain;
 extern crate futures;
 extern crate hyper;
+extern crate lettre;
 extern crate tokio_core;
 extern crate serde;
 #[macro_use]
