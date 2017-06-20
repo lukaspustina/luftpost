@@ -219,7 +219,7 @@ condition = 'Threshold'
 
         let config = Config::from_file(&path).unwrap();
 
-        assert_eq!(config.sensors.len(), 1);
+        assert_eq!(config.sensors.len(), 2);
     }
 
     #[test]

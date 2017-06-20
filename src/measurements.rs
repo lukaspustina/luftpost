@@ -157,11 +157,12 @@ mod test {
         data_values.insert(ValueType::MAX_MICRO, 27599f32);
         data_values.insert(ValueType::SIGNAL, -73f32);
         let expected = Measurement {
+			sensor_name: "A Sensor".to_string(),
             software_version: "NRZ-2017-089".to_string(),
             data_values: data_values,
         };
 
-        let m = wire_to_measurement(wire);
+        let m = wire_to_measurement("A Sensor".to_string(), wire);
 
         assert_eq!(m.unwrap(), expected);
     }
@@ -179,7 +180,7 @@ mod test {
             data_values: w_data_values,
         };
 
-        let res = wire_to_measurement(wire);
+        let res = wire_to_measurement("A Sensor".to_string(), wire);
 
         match res {
             Err(Error(ErrorKind::InvalidValueType(_), _)) => assert!(true),
@@ -200,7 +201,7 @@ mod test {
             data_values: w_data_values,
         };
 
-        let res = wire_to_measurement(wire);
+        let res = wire_to_measurement("A Sensor".to_string(), wire);
 
         match res {
             Err(Error(ErrorKind::InvalidValue(_), _)) => assert!(true),

@@ -13,7 +13,7 @@ fn read_measurement_local() -> () {
 
     let uri = "http://feinstaub/data.json".parse().unwrap();
     let response = create_client(&mut core).get(uri);
-    let work = read_measurement(response);
+    let work = read_measurement("Feinstaub".to_string(), response);
     let res = core.run(work).unwrap();
 
     assert!(res.data_values.contains_key(&ValueType::SDS_P1));
