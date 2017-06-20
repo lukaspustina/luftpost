@@ -32,7 +32,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
         * [X] E-Mail Options: exceed, no-data, okay
 
-    * [ ] Print Measurement data to terminal
+    * [X] Print Measurement data to terminal
 
     * [ ] Send E-Mails
 

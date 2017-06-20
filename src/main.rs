@@ -92,7 +92,7 @@ fn read_measurements(core: &mut Core, sensors: &[Sensor]) -> Result<Vec<Measurem
     let work = sensors.iter().map(|s| {
         let uri = s.uri.parse().unwrap();
         let response = client.get(uri);
-        read_measurement(response)
+        read_measurement(s.name.clone(), response)
     });
 
     let big_f = join_all(work);

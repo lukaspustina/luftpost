@@ -25,13 +25,14 @@ pub fn create_client(core: &mut Core) -> Client<HttpConnector> {
 }
 
 pub fn read_measurement(
+    sensor_name: String,
     response: FutureResponse,
 ) -> Box<Future<Item = Measurement, Error = Error>> {
     let m = response
         .and_then(|res| res.body().concat2())
         .map(|body| {
             let json = str::from_utf8(&body)?;
-            measurement_from_json(json).map_err(|e| e.into())
+            measurement_from_json(sensor_name, json).map_err(|e| e.into())
         })
         .map_err(|e| e.into())
         .and_then(|x| x);

@@ -18,6 +18,7 @@ error_chain! {
 
 #[derive(Debug, PartialEq)]
 pub struct Measurement {
+    pub sensor_name: String,
     pub software_version: String,
     pub data_values: HashMap<ValueType, f32>,
 }
@@ -53,12 +54,12 @@ impl<'a> From<&'a str> for ValueType {
     }
 }
 
-pub fn measurement_from_json(json: &str) -> Result<Measurement> {
+pub fn measurement_from_json(sensor_name: String, json: &str) -> Result<Measurement> {
     let wire_measurement = wire::decode_json_to_measurement(json)?;
-    wire_to_measurement(wire_measurement)
+    wire_to_measurement(sensor_name, wire_measurement)
 }
 
-fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
+fn wire_to_measurement(sensor_name: String, wire: wire::Measurement) -> Result<Measurement> {
     let mut data_values = HashMap::new();
 
     for dv in wire.data_values {
@@ -75,6 +76,7 @@ fn wire_to_measurement(wire: wire::Measurement) -> Result<Measurement> {
     }
 
     Ok(Measurement {
+        sensor_name: sensor_name,
         software_version: wire.software_version,
         data_values: data_values,
     })
