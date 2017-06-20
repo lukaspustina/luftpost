@@ -5,7 +5,8 @@ use tabwriter::TabWriter;
 pub fn output(measurements: &[Measurement]) -> () {
     let mut tw = TabWriter::new(vec![]);
     for ref m in measurements {
-        let _ = writeln!(
+        let _ =
+            writeln!(
             &mut tw,
             "Name is missing\t({})\tSDS_P1: {}",
             m.software_version,
@@ -17,4 +18,3 @@ pub fn output(measurements: &[Measurement]) -> () {
 
     println!("{}", out_str);
 }
-

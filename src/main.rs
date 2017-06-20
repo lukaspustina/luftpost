@@ -42,7 +42,7 @@ fn run() -> Result<i32> {
             BIN_NAME,
             shell.parse::<Shell>().unwrap(),
             &mut io::stdout(),
-            );
+        );
         return Ok(0);
     }
 
