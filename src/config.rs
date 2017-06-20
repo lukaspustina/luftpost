@@ -170,13 +170,12 @@ condition = 'Threshold'
 
         let config = Config::parse_toml(config_str).unwrap();
 
-        assert_eq!(config.defaults.threshold_pm10, Some(10.0));
-        assert_eq!(config.defaults.threshold_pm2, Some(10.0));
+        assert_eq!(config.defaults.threshold_pm10.unwrap(), 10.0);
+        assert_eq!(config.defaults.threshold_pm2.unwrap(), 10.0);
         assert_eq!(
-            config.defaults.e_mail_addr,
-            Some("test@example.com".to_string())
-        );
-        assert_eq!(config.defaults.e_mail_subject, Some("PM alarm".to_string()));
+            config.defaults.e_mail_addr.as_ref().unwrap(),
+            "test@example.com");
+        assert_eq!(config.defaults.e_mail_subject.as_ref().unwrap(), "PM alarm");
         assert_eq!(
             config.defaults.e_mail_condition,
             vec![EmailCondition::Okay, EmailCondition::NoData]
@@ -184,20 +183,20 @@ condition = 'Threshold'
 
         assert_eq!(config.sensors.len(), 2);
         let s1 = &config.sensors[0];
-        assert_eq!(s1.threshold_pm10, Some(10.0));
-        assert_eq!(s1.threshold_pm2, Some(10.0));
-        assert_eq!(s1.e_mail_addr, Some("test@example.com".to_string()));
-        assert_eq!(s1.e_mail_subject, Some("PM alarm".to_string()));
+        assert_eq!(s1.threshold_pm10.unwrap(), 10.0);
+        assert_eq!(s1.threshold_pm2.unwrap(), 10.0);
+        assert_eq!(s1.e_mail_addr.as_ref().unwrap(), "test@example.com");
+        assert_eq!(s1.e_mail_subject.as_ref().unwrap(), "PM alarm");
         assert_eq!(
             s1.e_mail_condition,
             vec![EmailCondition::Okay, EmailCondition::NoData]
         );
 
         let s2 = &config.sensors[1];
-        assert_eq!(s2.threshold_pm10, Some(20.0));
-        assert_eq!(s2.threshold_pm2, Some(20.0));
-        assert_eq!(s2.e_mail_addr, Some("another_test@example.com".to_string()));
-        assert_eq!(s2.e_mail_subject, Some("Feinstaubalarm".to_string()));
+        assert_eq!(s2.threshold_pm10.unwrap(), 20.0);
+        assert_eq!(s2.threshold_pm2.unwrap(), 20.0);
+        assert_eq!(s2.e_mail_addr.as_ref().unwrap(), "another_test@example.com");
+        assert_eq!(s2.e_mail_subject.as_ref().unwrap(), "Feinstaubalarm");
         assert_eq!(s2.e_mail_condition, vec![EmailCondition::Threshold]);
     }
 
