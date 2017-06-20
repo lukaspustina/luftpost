@@ -4,3 +4,7 @@
 name = "Feinstaub"
 uri = "http://feinstaub/data.json"
 
+[[sensors]]
+name = "Feinstau"
+uri = "http://feinstau/data.json"
+
