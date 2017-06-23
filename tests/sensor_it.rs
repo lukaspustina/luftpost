@@ -16,5 +16,5 @@ fn read_measurement_local() -> () {
     let res = core.run(work).unwrap();
 
     assert_eq!(res.data_values.len(), 8);
-    print_measurements(&vec!(res));
+    print_measurements(&[res]);
 }

@@ -57,8 +57,9 @@ fn run() -> Result<i32> {
         println!("Measurements collected:");
         luftpost::print_measurements(&measurements);
     }
-    let threshold_violations = measurements.into_iter()
-        .filter(|m| luftpost::check_thresholds(&m).len() > 0)
+    let threshold_violations = measurements
+        .into_iter()
+        .filter(|m| !luftpost::check_thresholds(m).is_empty())
         .collect::<Vec<_>>();
     if print {
         println!("Measurements exceeding thresholds:");
