@@ -1,3 +1,5 @@
+use sensors::Sensor;
+
 use lettre::transport::smtp::authentication;
 use serde::de::{self, Deserializer, Visitor};
 use std::fs::File;
@@ -67,18 +69,6 @@ fn auth_mechanism<D>(deserializer: D) -> ::std::result::Result<Option<authentica
 	}
 
 	deserializer.deserialize_string(MechanismVisitor)
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Sensor {
-	pub name: String,
-	pub uri: String,
-	pub threshold_pm10: Option<f32>,
-	pub threshold_pm2: Option<f32>,
-	pub e_mail_addr: Option<String>,
-	pub e_mail_subject: Option<String>,
-	#[serde(default = "Vec::new")]
-	pub e_mail_condition: Vec<EmailCondition>,
 }
 
 #[derive(Debug, Deserialize)]

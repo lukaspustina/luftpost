@@ -9,7 +9,7 @@ pub fn output(measurements: &[Measurement]) -> () {
             writeln!(
             &mut tw,
             "{}\t({})\tPM 10: {}\tPM 2.5: {}\t Temperature: {}\t Humidity: {}\t Samples: {}\t Min. micro: {}\t Max. micro: {}\t Wifi signal: {}",
-            m.sensor_name,
+            m.sensor.name,
             m.software_version,
             m.data_values.get(&ValueType::SDS_P1).unwrap_or(&-1.0f32),
             m.data_values.get(&ValueType::SDS_P2).unwrap_or(&-1.0f32),

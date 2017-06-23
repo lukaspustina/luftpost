@@ -1,7 +1,7 @@
 extern crate luftpost;
 extern crate tokio_core;
 
-use luftpost::sensors::{create_client, read_measurement};
+use luftpost::sensors::{Sensor, create_client};
 use luftpost::measurements::ValueType;
 
 use tokio_core::reactor::Core;
@@ -13,7 +13,7 @@ fn read_measurement_local() -> () {
 
     let uri = "http://feinstaub/data.json".parse().unwrap();
     let response = create_client(&mut core).get(uri);
-    let work = read_measurement("Feinstaub".to_string(), response);
+    let work = Sensor::new("A Sensor", "http://localhost").read_measurement(response);
     let res = core.run(work).unwrap();
 
     assert!(res.data_values.contains_key(&ValueType::SDS_P1));

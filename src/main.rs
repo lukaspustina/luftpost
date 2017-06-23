@@ -8,10 +8,9 @@ extern crate tokio_core;
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
 use luftpost::Config;
-use luftpost::config::Sensor;
 use luftpost::measurements::Measurement;
 use luftpost::output::output;
-use luftpost::sensors::{create_client, read_measurement};
+use luftpost::sensors::{self, Sensor};
 use std::io;
 use std::path::Path;
 use tokio_core::reactor::Core;
@@ -56,7 +55,7 @@ fn run() -> Result<i32> {
 
     let mut core = Core::new()?;
 
-    let res = read_measurements(&mut core, &config.sensors)?;
+    let res = read_measurements(&mut core, config.sensors)?;
     output(&res);
 
     Ok(0)
@@ -87,12 +86,12 @@ fn build_cli() -> App<'static, 'static> {
              .help("The shell to generate the script for"))
 }
 
-fn read_measurements(core: &mut Core, sensors: &[Sensor]) -> Result<Vec<Measurement>> {
-    let client = create_client(core);
-    let work = sensors.iter().map(|s| {
+fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measurement>> {
+    let client = sensors::create_client(core);
+    let work = sensors.into_iter().map(|s| {
         let uri = s.uri.parse().unwrap();
         let response = client.get(uri);
-        read_measurement(s.name.clone(), response)
+        s.read_measurement(response)
     });
 
     let big_f = join_all(work);
