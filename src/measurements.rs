@@ -160,7 +160,7 @@ mod test {
         data_values.insert(ValueType::MAX_MICRO, 27599f32);
         data_values.insert(ValueType::SIGNAL, -73f32);
         let expected = Measurement {
-			sensor: Sensor::new("A Sensor", "http://localhost"),
+            sensor: Sensor::new("A Sensor", "http://localhost"),
             software_version: "NRZ-2017-089".to_string(),
             data_values: data_values,
         };
