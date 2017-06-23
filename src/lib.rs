@@ -11,12 +11,17 @@ extern crate serde_json;
 extern crate tabwriter;
 extern crate toml;
 
+pub mod check;
 pub mod config;
-pub use config::Config;
-
-pub mod measurements;
+pub mod measurement;
 pub mod output;
-pub mod sensors;
+pub mod sensor;
+
+pub use config::Config;
+pub use measurement::Measurement;
+pub use sensor::Sensor;
+pub use sensor::create_sensor_reader;
+pub use output::print_measurements;
 
 #[cfg(test)]
 #[macro_use]

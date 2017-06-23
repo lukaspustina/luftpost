@@ -1,4 +1,4 @@
-use sensors::Sensor;
+use sensor::Sensor;
 
 use lettre::transport::smtp::authentication;
 use serde::de::{self, Deserializer, Visitor};

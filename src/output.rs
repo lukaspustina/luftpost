@@ -1,24 +1,32 @@
-use measurements::{Measurement, ValueType};
+use measurement::{Measurement, Value};
 use std::io::Write;
 use tabwriter::TabWriter;
 
-pub fn output(measurements: &[Measurement]) -> () {
+pub fn print_measurements(measurements: &[Measurement]) -> () {
     let mut tw = TabWriter::new(vec![]);
     for ref m in measurements {
+        let values_str = m.data_values.iter()
+            .map(|value|
+                match value {
+                    &Value::SDS_P1(v) => format!("PM 10: {}", v),
+                    &Value::SDS_P2(v) => format!("PM 2.5: {}", v),
+                    &Value::TEMPERATURE(v) => format!("Temperature: {}", v),
+                    &Value::HUMIDITY(v) => format!("Humidity: {}", v),
+                    &Value::SAMPLES(v) => format!("Samples: {}", v),
+                    &Value::MIN_MICRO(v) => format!("Min. micro: {}", v),
+                    &Value::MAX_MICRO(v) => format!("Max. micro: {}", v),
+                    &Value::SIGNAL(v) => format!("Wifi signal: {}", v),
+                    &Value::UNKNOWN(ref s) => format!("Unknown value: {}", s),
+                })
+            .collect::<Vec<_>>()
+            .join("\t");
         let _ =
             writeln!(
             &mut tw,
-            "{}\t({})\tPM 10: {}\tPM 2.5: {}\t Temperature: {}\t Humidity: {}\t Samples: {}\t Min. micro: {}\t Max. micro: {}\t Wifi signal: {}",
+            "{}\t({})\t{}",
             m.sensor.name,
             m.software_version,
-            m.data_values.get(&ValueType::SDS_P1).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::SDS_P2).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::TEMPERATURE).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::HUMIDITY).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::SAMPLES).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::MIN_MICRO).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::MAX_MICRO).unwrap_or(&-1.0f32),
-            m.data_values.get(&ValueType::SIGNAL).unwrap_or(&-1.0f32),
+            values_str
         );
     }
     tw.flush().unwrap();

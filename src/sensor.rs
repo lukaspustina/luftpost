@@ -1,6 +1,5 @@
 use config;
-use measurements;
-use measurements::Measurement;
+use measurement::{self, Measurement};
 use futures::{Future, Stream};
 use hyper::Client;
 use hyper::client::{FutureResponse, HttpConnector};
@@ -12,7 +11,7 @@ error_chain! {
 
     }
     links {
-        ReadingMeasurementFailed(measurements::Error, measurements::ErrorKind);
+        ReadingMeasurementFailed(measurement::Error, measurement::ErrorKind);
     }
     foreign_links {
         Fmt(::std::str::Utf8Error);
@@ -63,6 +62,6 @@ impl Sensor {
     }
 }
 
-pub fn create_client(core: &mut Core) -> Client<HttpConnector> {
+pub fn create_sensor_reader(core: &mut Core) -> Client<HttpConnector> {
     Client::new(&core.handle())
 }

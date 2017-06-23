@@ -1,5 +1,4 @@
-use sensors::Sensor;
-use std::collections::HashMap;
+use sensor::Sensor;
 
 error_chain! {
     errors {
@@ -21,36 +20,37 @@ error_chain! {
 pub struct Measurement {
     pub sensor: Sensor,
     pub software_version: String,
-    pub data_values: HashMap<ValueType, f32>,
+    pub data_values: Vec<Value>,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq)]
 #[allow(non_camel_case_types)]
-pub enum ValueType {
-    SDS_P1,
-    SDS_P2,
-    TEMPERATURE,
-    HUMIDITY,
-    SAMPLES,
-    MIN_MICRO,
-    MAX_MICRO,
-    SIGNAL,
+pub enum Value {
+    SDS_P1(f32),
+    SDS_P2(f32),
+    TEMPERATURE(f32),
+    HUMIDITY(f32),
+    SAMPLES(f32),
+    MIN_MICRO(f32),
+    MAX_MICRO(f32),
+    SIGNAL(f32),
     UNKNOWN(String),
 }
 
-impl<'a> From<&'a str> for ValueType {
-    fn from(type_str: &'a str) -> Self {
+impl<'a> From<(&'a str, f32)> for Value {
+    fn from(type_tuple: (&'a str, f32)) -> Self {
+        let (type_str, value) = type_tuple;
         let upper = &type_str.to_uppercase()[..];
         match upper {
-            "SDS_P1" => ValueType::SDS_P1,
-            "SDS_P2" => ValueType::SDS_P2,
-            "TEMPERATURE" => ValueType::TEMPERATURE,
-            "HUMIDITY" => ValueType::HUMIDITY,
-            "SAMPLES" => ValueType::SAMPLES,
-            "MIN_MICRO" => ValueType::MIN_MICRO,
-            "MAX_MICRO" => ValueType::MAX_MICRO,
-            "SIGNAL" => ValueType::SIGNAL,
-            _ => ValueType::UNKNOWN(type_str.to_string()),
+            "SDS_P1" => Value::SDS_P1(value),
+            "SDS_P2" => Value::SDS_P2(value),
+            "TEMPERATURE" => Value::TEMPERATURE(value),
+            "HUMIDITY" => Value::HUMIDITY(value),
+            "SAMPLES" => Value::SAMPLES(value),
+            "MIN_MICRO" => Value::MIN_MICRO(value),
+            "MAX_MICRO" => Value::MAX_MICRO(value),
+            "SIGNAL" => Value::SIGNAL(value),
+            _ => Value::UNKNOWN(type_str.to_string()),
         }
     }
 }
@@ -63,18 +63,16 @@ impl Measurement {
 }
 
 fn wire_to_measurement(sensor: Sensor, wire: wire::Measurement) -> Result<Measurement> {
-    let mut data_values = HashMap::new();
+    let mut data_values = Vec::new();
 
     for dv in wire.data_values {
         let value_str = dv.value;
         let value = value_str
             .parse::<f32>()
             .chain_err(|| ErrorKind::InvalidValue(value_str.to_string()))?;
-        match ValueType::from(&dv.value_type[..]) {
-            ValueType::UNKNOWN(str) => bail!(ErrorKind::InvalidValueType(str)),
-            vt => {
-                data_values.insert(vt, value);
-            }
+        match Value::from((&dv.value_type[..], value)) {
+            Value::UNKNOWN(str) => bail!(ErrorKind::InvalidValueType(str)),
+            vt => data_values.push(vt),
         }
     }
 
@@ -91,21 +89,21 @@ mod test {
 
     #[test]
     fn value_type_from_str_ok() -> () {
-        assert_eq!(ValueType::SDS_P1, "SDS_P1".into());
-        assert_eq!(ValueType::SDS_P2, "SDS_P2".into());
-        assert_eq!(ValueType::TEMPERATURE, "TEMPERATURE".into());
-        assert_eq!(ValueType::HUMIDITY, "HUMIDITY".into());
-        assert_eq!(ValueType::SAMPLES, "SAMPLES".into());
-        assert_eq!(ValueType::MIN_MICRO, "MIN_MICRO".into());
-        assert_eq!(ValueType::MAX_MICRO, "MAX_MICRO".into());
-        assert_eq!(ValueType::SIGNAL, "SIGNAL".into());
+        assert_eq!(Value::SDS_P1(10.0), ("SDS_P1", 10.0).into());
+        assert_eq!(Value::SDS_P2(11.0), ("SDS_P2", 11.0).into());
+        assert_eq!(Value::TEMPERATURE(12.0), ("TEMPERATURE", 12.0).into());
+        assert_eq!(Value::HUMIDITY(13.0), ("HUMIDITY", 13.0).into());
+        assert_eq!(Value::SAMPLES(14.0), ("SAMPLES", 14.0).into());
+        assert_eq!(Value::MIN_MICRO(15.0), ("MIN_MICRO", 15.0).into());
+        assert_eq!(Value::MAX_MICRO(16.0), ("MAX_MICRO", 16.0).into());
+        assert_eq!(Value::SIGNAL(17.0), ("SIGNAL", 17.0).into());
     }
 
     #[test]
     fn value_type_from_str_unknown() -> () {
         assert_eq!(
-            ValueType::UNKNOWN("does not exists".to_string()),
-            "does not exists".into()
+            Value::UNKNOWN("does not exists".to_string()),
+            ("does not exists", 10.0).into()
         );
     }
 
@@ -150,15 +148,15 @@ mod test {
             data_values: w_data_values,
         };
 
-        let mut data_values = HashMap::new();
-        data_values.insert(ValueType::SDS_P1, 7.87f32);
-        data_values.insert(ValueType::SDS_P2, 3.17f32);
-        data_values.insert(ValueType::TEMPERATURE, 18.90f32);
-        data_values.insert(ValueType::HUMIDITY, 49.10f32);
-        data_values.insert(ValueType::SAMPLES, 739514f32);
-        data_values.insert(ValueType::MIN_MICRO, 192f32);
-        data_values.insert(ValueType::MAX_MICRO, 27599f32);
-        data_values.insert(ValueType::SIGNAL, -73f32);
+        let mut data_values = Vec::new();
+        data_values.push(Value::SDS_P1(7.87f32));
+        data_values.push(Value::SDS_P2(3.17f32));
+        data_values.push(Value::TEMPERATURE(18.90f32));
+        data_values.push(Value::HUMIDITY(49.10f32));
+        data_values.push(Value::SAMPLES(739514f32));
+        data_values.push(Value::MIN_MICRO(192f32));
+        data_values.push(Value::MAX_MICRO(27599f32));
+        data_values.push(Value::SIGNAL(-73f32));
         let expected = Measurement {
             sensor: Sensor::new("A Sensor", "http://localhost"),
             software_version: "NRZ-2017-089".to_string(),

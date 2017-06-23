@@ -7,10 +7,7 @@ extern crate tokio_core;
 
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
-use luftpost::Config;
-use luftpost::measurements::Measurement;
-use luftpost::output::output;
-use luftpost::sensors::{self, Sensor};
+use luftpost::{Config, Measurement, Sensor};
 use std::io;
 use std::path::Path;
 use tokio_core::reactor::Core;
@@ -23,7 +20,7 @@ error_chain! {
     }
     links {
         ConfigError(luftpost::config::Error, luftpost::config::ErrorKind);
-        ReadingMeasurementFailed(luftpost::sensors::Error, luftpost::sensors::ErrorKind);
+        ReadingMeasurementFailed(luftpost::sensor::Error, luftpost::sensor::ErrorKind);
     }
     foreign_links {
         IoError(std::io::Error);
@@ -56,7 +53,7 @@ fn run() -> Result<i32> {
     let mut core = Core::new()?;
 
     let res = read_measurements(&mut core, config.sensors)?;
-    output(&res);
+    luftpost::print_measurements(&res);
 
     Ok(0)
 }
@@ -87,7 +84,7 @@ fn build_cli() -> App<'static, 'static> {
 }
 
 fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measurement>> {
-    let client = sensors::create_client(core);
+    let client = luftpost::create_sensor_reader(core);
     let work = sensors.into_iter().map(|s| {
         let uri = s.uri.parse().unwrap();
         let response = client.get(uri);
