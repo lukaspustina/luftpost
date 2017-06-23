@@ -48,12 +48,23 @@ fn run() -> Result<i32> {
     if cli_args.is_present("show-config") {
         println!("Config: {:?}", &config);
     }
-    let print_only = cli_args.is_present("print-only");
+    let print = cli_args.is_present("print");
 
     let mut core = Core::new()?;
 
-    let res = read_measurements(&mut core, config.sensors)?;
-    luftpost::print_measurements(&res);
+    let measurements = read_measurements(&mut core, config.sensors)?;
+    if print {
+        println!("Measurements collected:");
+        luftpost::print_measurements(&measurements);
+    }
+    let threshold_violations = measurements.into_iter()
+        .filter(|m| luftpost::check_thresholds(&m).len() > 0)
+        .collect::<Vec<_>>();
+    if print {
+        println!("Measurements exceeding thresholds:");
+        luftpost::print_measurements(&threshold_violations);
+    }
+
 
     Ok(0)
 }
@@ -69,9 +80,9 @@ fn build_cli() -> App<'static, 'static> {
              .value_name("FILE")
              .help("Sets the config file")
              .takes_value(true))
-        .arg(Arg::with_name("print-only")
-             .long("print-only")
-             .help("Print measurements without sending e-mails only"))
+        .arg(Arg::with_name("print")
+             .long("print")
+             .help("Print results"))
         .arg(Arg::with_name("show-config")
              .long("show-config")
              .help("Prints config"))

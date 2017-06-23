@@ -17,6 +17,7 @@ pub mod measurement;
 pub mod output;
 pub mod sensor;
 
+pub use check::check_thresholds;
 pub use config::Config;
 pub use measurement::Measurement;
 pub use sensor::Sensor;

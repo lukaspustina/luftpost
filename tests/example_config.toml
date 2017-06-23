@@ -1,10 +1,14 @@
 [defaults]
+threshold_pm10 = 1.0
+threshold_pm2 = 1.0
 
 [[sensors]]
 name = "Feinstaub"
 uri = "http://feinstaub/data.json"
+threshold_pm10 = 10.0
+threshold_pm2 = 10.0
 
 [[sensors]]
-name = "Feinstaub"
+name = "Feinstaub 2"
 uri = "http://feinstaub/data.json"
 
