@@ -13,15 +13,16 @@ extern crate toml;
 
 pub mod check;
 pub mod config;
+pub mod mail;
 pub mod measurement;
 pub mod output;
 pub mod sensor;
 
 pub use check::check_thresholds;
 pub use config::Config;
+pub use mail::{create_transport, mail_measurement};
 pub use measurement::Measurement;
-pub use sensor::Sensor;
-pub use sensor::create_sensor_reader;
+pub use sensor::{Sensor, create_sensor_reader};
 pub use output::print_measurements;
 
 #[cfg(test)]
