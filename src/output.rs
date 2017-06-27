@@ -2,7 +2,7 @@ use measurement::{Measurement, Value};
 use std::io::Write;
 use tabwriter::TabWriter;
 
-pub fn print_measurements(measurements: &[Measurement]) -> () {
+pub fn print_measurements(measurements: &[&Measurement]) -> () {
     let mut tw = TabWriter::new(vec![]);
     for m in measurements {
         let values_str = m.data_values

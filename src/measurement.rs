@@ -23,7 +23,7 @@ pub struct Measurement {
     pub data_values: Vec<Value>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 pub enum Value {
     SDS_P1(f32),

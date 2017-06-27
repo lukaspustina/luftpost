@@ -55,15 +55,16 @@ fn run() -> Result<i32> {
     let measurements = read_measurements(&mut core, config.sensors)?;
     if print {
         println!("Measurements collected:");
-        luftpost::print_measurements(&measurements);
+        luftpost::print_measurements(measurements.iter().map(|m| m).collect::<Vec<_>>().as_slice());
     }
-    let threshold_violations = measurements
+    let checked_measurements = measurements
         .into_iter()
-        .filter(|m| !luftpost::check_thresholds(m).is_empty())
+        .map(|m| luftpost::check_measurement(m))
         .collect::<Vec<_>>();
     if print {
         println!("Measurements exceeding thresholds:");
-        luftpost::print_measurements(&threshold_violations);
+        let violations = checked_measurements.iter().filter(|m| !m.violations.is_empty()).map(|cm| &cm.measurement).collect::<Vec<_>>();
+        luftpost::print_measurements(violations.as_slice())
     }
 
 

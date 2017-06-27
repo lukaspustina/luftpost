@@ -18,7 +18,7 @@ pub mod measurement;
 pub mod output;
 pub mod sensor;
 
-pub use check::check_thresholds;
+pub use check::check_measurement;
 pub use config::Config;
 pub use mail::{create_transport, mail_measurement};
 pub use measurement::Measurement;

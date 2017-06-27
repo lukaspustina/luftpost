@@ -1,17 +1,25 @@
 use measurement::{Measurement, Value};
 
-pub fn check_thresholds(measurement: &Measurement) -> Vec<&Value> {
-    measurement
+pub struct CheckedMeasurement {
+    pub measurement: Measurement,
+    pub violations: Vec<Value>,
+}
+
+pub fn check_measurement(measurement: Measurement) -> CheckedMeasurement {
+    let violations = measurement
         .data_values
-        .iter()
-        .map(|value| match *value {
+        .clone()
+        .into_iter()
+        .map(|value| match value {
             // Unwraps are save because they are sent during config parsing
             Value::SDS_P1(v) if v > measurement.sensor.threshold_pm10.unwrap() => Some(value),
             Value::SDS_P2(v) if v > measurement.sensor.threshold_pm2.unwrap() => Some(value),
             _ => None,
         })
         .flat_map(|v| v)
-        .collect()
+        .collect();
+
+    CheckedMeasurement { measurement: measurement, violations: violations }
 }
 
 #[cfg(test)]
@@ -21,7 +29,7 @@ mod test {
     use sensor::Sensor;
 
     #[test]
-    fn check_thresholds_okay() -> () {
+    fn check_measurement_okay() -> () {
         let sensor = Sensor {
             name: "A Sensor".to_string(),
             uri: "http://localhost".to_string(),
@@ -40,9 +48,9 @@ mod test {
             data_values: data_values,
         };
 
-        let res = check_thresholds(&measurement);
+        let res = check_measurement(measurement);
 
-        assert_eq!(res.len(), 2);
+        assert_eq!(res.violations.len(), 2);
 
     }
 }
