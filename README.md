@@ -38,6 +38,10 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [ ] Send E-Mails
 
+        * [ ] Send E-Mails
+
+        * [ ] Move to Futures
+
 * [ ] Infrastructure
 
     * [ ] Travis CI, appveyor
