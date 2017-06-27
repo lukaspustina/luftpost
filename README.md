@@ -42,6 +42,10 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
         * [ ] Move to Futures
 
+        * [ ] Make sure e_mail_addr and e_mail_subject are set; at least in defauls
+
+    * [ ] Show full error stack
+
 * [ ] Infrastructure
 
     * [ ] Travis CI, appveyor

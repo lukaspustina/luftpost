@@ -2,12 +2,14 @@ extern crate clap;
 #[macro_use]
 extern crate error_chain;
 extern crate futures;
+extern crate lettre;
 extern crate luftpost;
 extern crate tokio_core;
 
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
 use luftpost::{Config, Measurement, Sensor};
+use luftpost::config::EmailCondition;
 use std::io;
 use std::path::Path;
 use tokio_core::reactor::Core;
@@ -21,6 +23,7 @@ error_chain! {
     links {
         ConfigError(luftpost::config::Error, luftpost::config::ErrorKind);
         ReadingMeasurementFailed(luftpost::sensor::Error, luftpost::sensor::ErrorKind);
+        EmailError(luftpost::mail::Error, luftpost::mail::ErrorKind);
     }
     foreign_links {
         IoError(std::io::Error);
@@ -38,7 +41,7 @@ fn run() -> Result<i32> {
             BIN_NAME,
             shell.parse::<Shell>().unwrap(),
             &mut io::stdout(),
-        );
+            );
         return Ok(0);
     }
 
@@ -67,6 +70,23 @@ fn run() -> Result<i32> {
         luftpost::print_measurements(violations.as_slice())
     }
 
+    if let Some(ref smtp) = config.smtp {
+        println!("Sending E-Mails:");
+        let mut transport = luftpost::create_transport(smtp)?;
+        let results = checked_measurements
+            .iter()
+            .filter(|cm|
+                match cm.measurement.sensor.e_mail_condition.unwrap() {
+                    EmailCondition::Always | EmailCondition::ThresholdExceeded if !cm.violations.is_empty() => true,
+                    _ => false
+                }
+            )
+            .map(|cm| {
+                println!("{}", cm.measurement.sensor.name);
+                luftpost::mail_measurement(&cm.measurement, &mut transport).map_err(|e| e.into())
+            });
+        results.collect::<::std::result::Result<Vec<()>, Error>>()?;
+    }
 
     Ok(0)
 }

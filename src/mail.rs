@@ -2,7 +2,8 @@ use config::Smtp;
 use measurement::Measurement;
 use lettre::email::{Email, EmailBuilder};
 use lettre::transport::EmailTransport;
-use lettre::transport::smtp::SmtpTransport;
+use lettre::transport::smtp::{SecurityLevel, SmtpTransport, SmtpTransportBuilder};
+use lettre::transport::smtp::SUBMISSION_PORT;
 use lettre::transport::stub::StubEmailTransport;
 use lettre::transport::file::FileEmailTransport;
 
@@ -23,15 +24,28 @@ pub enum Transport {
     Stub(StubEmailTransport)
 }
 
-pub fn create_transport(smtp: Smtp) -> Result<Transport> {
-    unimplemented!();
+pub fn create_transport(smtp: &Smtp) -> Result<Transport> {
+    let mut builder = SmtpTransportBuilder::new(
+        (&smtp.server[..], smtp.port.unwrap_or_else(|| SUBMISSION_PORT))).unwrap()
+        .hello_name("my.hostname.tld")
+        .security_level(SecurityLevel::Opportunistic)
+        .smtp_utf8(true)
+        .connection_reuse(true);
+    if smtp.username.is_some() && smtp.password.is_some() && smtp.auth_mechanism.is_some() {
+        builder = builder
+            .credentials(smtp.username.as_ref().unwrap(), smtp.password.as_ref().unwrap())
+            .authentication_mechanism(smtp.auth_mechanism.unwrap());
+    }
+    let mailer = builder.build();
+
+    Ok(Transport::Smtp(mailer))
 }
 
-pub fn mail_measurement(measurement: Measurement, transport: &mut Transport) -> Result<()> {
+pub fn mail_measurement(measurement: &Measurement, transport: &mut Transport) -> Result<()> {
     let email = EmailBuilder::new()
-        .to(&measurement.sensor.e_mail_addr.unwrap()[..])
+        .to(&measurement.sensor.e_mail_addr.as_ref().unwrap()[..])
         .from("user@localhost")
-        .subject(&measurement.sensor.e_mail_subject.unwrap())
+        .subject(&measurement.sensor.e_mail_subject.as_ref().unwrap())
         .body("Hello World!")
         .build()?;
     transport.send(email)
@@ -40,9 +54,9 @@ pub fn mail_measurement(measurement: Measurement, transport: &mut Transport) -> 
 impl Transport {
     fn send(&mut self, email: Email) -> Result<()> {
         match *self {
-            Transport::File(ref mut file) => file.send(email).map_err(|e| e.into()).map(|_| ()),
-            Transport::Smtp(ref mut smtp) => smtp.send(email).map_err(|e| e.into()).map(|_| ()),
-            Transport::Stub(ref mut stub) => stub.send(email).map_err(|e| e.into()).map(|_| ()),
+            Transport::File(ref mut file) => file.send(email).map(|_| ()).map_err(|e| e.into()),
+            Transport::Smtp(ref mut smtp) => smtp.send(email).map(|_| ()).map_err(|e| e.into()),
+            Transport::Stub(ref mut stub) => stub.send(email).map(|_| ()).map_err(|e| e.into()),
         }
     }
 }
@@ -82,7 +96,7 @@ mod test {
         };
         let mut transport = Transport::Stub(StubEmailTransport);
 
-        let res = mail_measurement(measurement, &mut transport);
+        let res = mail_measurement(&measurement, &mut transport);
 
         assert!(res.is_ok());
     }

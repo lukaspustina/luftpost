@@ -39,7 +39,7 @@ pub struct Defaults {
 pub struct Smtp {
     pub sender: String,
     pub server: String,
-    pub port: Option<i16>,
+    pub port: Option<u16>,
     pub username: Option<String>,
     pub password: Option<String>,
     #[serde(deserialize_with = "auth_mechanism")]

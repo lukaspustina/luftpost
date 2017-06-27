@@ -20,7 +20,7 @@ travis-ci = { repository = "lukaspustina/luftdaten", branch = "master" }
 appveyor = { repository = "lukaspustina/luftdaten", branch = "master" }
 
 [[bin]]
-name = "luftdaten"
+name = "luftpost"
 path = "src/main.rs"
 
 [dependencies]

@@ -1,6 +1,16 @@
 [defaults]
 threshold_pm10 = 1.0
 threshold_pm2 = 1.0
+e_mail_addr = "Mööp"
+e_mail_subject = "Mööp"
+
+[smtp]
+sender = "test@example.com"
+server = "localhost"
+port = "25"
+username = "test"
+password = "example"
+auth_mechanism = "CramMd5"
 
 [[sensors]]
 name = "Feinstaub"
