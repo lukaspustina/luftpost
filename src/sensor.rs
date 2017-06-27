@@ -29,8 +29,7 @@ pub struct Sensor {
     pub threshold_pm2: Option<f32>,
     pub e_mail_addr: Option<String>,
     pub e_mail_subject: Option<String>,
-    #[serde(default = "Vec::new")]
-    pub e_mail_condition: Vec<config::EmailCondition>,
+    pub e_mail_condition: Option<config::EmailCondition>,
 }
 
 impl Sensor {
@@ -42,7 +41,7 @@ impl Sensor {
             threshold_pm2: None,
             e_mail_addr: None,
             e_mail_subject: None,
-            e_mail_condition: Vec::new(),
+            e_mail_condition: None,
         }
     }
 

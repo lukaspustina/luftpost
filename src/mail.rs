@@ -64,7 +64,7 @@ mod test {
             threshold_pm2: Some(2.0),
             e_mail_addr: Some("test@example.com".to_string()),
             e_mail_subject: Some("PM Alarm".to_string()),
-            e_mail_condition: Vec::new(),
+            e_mail_condition: None,
         };
         let mut data_values = Vec::new();
         data_values.push(Value::SDS_P1(7.87f32));

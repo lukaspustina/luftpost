@@ -22,9 +22,8 @@ error_chain! {
 #[derive(PartialOrd, PartialEq, Eq)]
 #[derive(Clone, Copy)]
 pub enum EmailCondition {
-    Okay,
-    Threshold,
-    NoData,
+    Always,
+    ThresholdExceeded,
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,8 +32,7 @@ pub struct Defaults {
     pub threshold_pm2: Option<f32>,
     pub e_mail_addr: Option<String>,
     pub e_mail_subject: Option<String>,
-    #[serde(default = "Vec::new")]
-    pub e_mail_condition: Vec<EmailCondition>,
+    pub e_mail_condition: Option<EmailCondition>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -114,11 +112,7 @@ impl Config {
         let threshold_pm2 = config.defaults.threshold_pm2.or(Some(50.0));
         let e_mail_addr = config.defaults.e_mail_addr;
         let e_mail_subject = config.defaults.e_mail_subject;
-        let e_mail_condition = if config.defaults.e_mail_condition.is_empty() {
-            vec![EmailCondition::Threshold]
-        } else {
-            config.defaults.e_mail_condition
-        };
+        let e_mail_condition = config.defaults.e_mail_condition.or(Some(EmailCondition::ThresholdExceeded));
 
         let sensors = config
             .sensors
@@ -128,11 +122,7 @@ impl Config {
                 let s_threshold_pm2 = s.threshold_pm2.or(threshold_pm2);
                 let s_e_mail_addr = s.e_mail_addr.or_else(|| e_mail_addr.clone());
                 let s_e_mail_subject = s.e_mail_subject.or_else(|| e_mail_subject.clone());
-                let s_e_mail_condition = if s.e_mail_condition.is_empty() {
-                    e_mail_condition.clone()
-                } else {
-                    s.e_mail_condition
-                };
+                let s_e_mail_condition = s.e_mail_condition.or_else(|| e_mail_condition.clone());
                 Sensor {
                     threshold_pm10: s_threshold_pm10,
                     threshold_pm2: s_threshold_pm2,
@@ -184,10 +174,8 @@ threshold_pm10 = 10.0
 threshold_pm2 = 10.0
 e_mail_addr = "test@example.com"
 e_mail_subject = "PM alarm"
-[[defaults.e_mail_condition]]
-condition = 'Okay'
-[[defaults.e_mail_condition]]
-condition = 'NoData'
+[defaults.e_mail_condition]
+condition = 'Always'
 
 [smtp]
 sender = "test@example.com"
@@ -208,8 +196,8 @@ threshold_pm10 = 20.0
 threshold_pm2 = 20.0
 e_mail_addr = "another_test@example.com"
 e_mail_subject = "Feinstaubalarm"
-[[sensors.e_mail_condition]]
-condition = 'Threshold'
+[sensors.e_mail_condition]
+condition = 'ThresholdExceeded'
 "#;
 
         let config = Config::parse_toml(config_str).unwrap();
@@ -221,10 +209,7 @@ condition = 'Threshold'
             "test@example.com"
         );
         assert_eq!(config.defaults.e_mail_subject.as_ref().unwrap(), "PM alarm");
-        assert_eq!(
-            config.defaults.e_mail_condition,
-            vec![EmailCondition::Okay, EmailCondition::NoData]
-        );
+        assert_eq!(config.defaults.e_mail_condition.unwrap(), EmailCondition::Always);
 
         assert!(config.smtp.is_some());
         let smtp = config.smtp.unwrap();
@@ -245,17 +230,14 @@ condition = 'Threshold'
         assert_eq!(s1.threshold_pm2.unwrap(), 10.0);
         assert_eq!(s1.e_mail_addr.as_ref().unwrap(), "test@example.com");
         assert_eq!(s1.e_mail_subject.as_ref().unwrap(), "PM alarm");
-        assert_eq!(
-            s1.e_mail_condition,
-            vec![EmailCondition::Okay, EmailCondition::NoData]
-        );
+        assert_eq!(s1.e_mail_condition.unwrap(), EmailCondition::Always);
 
         let s2 = &config.sensors[1];
         assert_eq!(s2.threshold_pm10.unwrap(), 20.0);
         assert_eq!(s2.threshold_pm2.unwrap(), 20.0);
         assert_eq!(s2.e_mail_addr.as_ref().unwrap(), "another_test@example.com");
         assert_eq!(s2.e_mail_subject.as_ref().unwrap(), "Feinstaubalarm");
-        assert_eq!(s2.e_mail_condition, vec![EmailCondition::Threshold]);
+        assert_eq!(s2.e_mail_condition.unwrap(), EmailCondition::ThresholdExceeded);
     }
 
     #[test]

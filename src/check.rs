@@ -37,7 +37,7 @@ mod test {
             threshold_pm2: Some(2.0),
             e_mail_addr: None,
             e_mail_subject: None,
-            e_mail_condition: Vec::new(),
+            e_mail_condition: None,
         };
         let mut data_values = Vec::new();
         data_values.push(Value::SDS_P1(17.87f32));
