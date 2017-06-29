@@ -51,15 +51,15 @@ pub struct Smtp {
 }
 
 //fn deserialize_u64_or_empty_string<D>(deserializer: &mut D) -> Result<u64, D::Error> where D: Deserializer
-fn auth_mechanism<D>(
+fn auth_mechanism<'de, D>(
     deserializer: D,
 ) -> ::std::result::Result<Option<authentication::Mechanism>, D::Error>
 where
-    D: Deserializer,
+    D: Deserializer<'de>,
 {
     struct MechanismVisitor;
 
-    impl Visitor for MechanismVisitor {
+    impl<'a> Visitor<'a> for MechanismVisitor {
         type Value = Option<authentication::Mechanism>;
 
         fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -188,7 +188,7 @@ condition = 'Always'
 [smtp]
 sender = "test@example.com"
 server = "localhost"
-port = "25"
+port = 25
 username = "test"
 password = "example"
 auth_mechanism = "CramMd5"

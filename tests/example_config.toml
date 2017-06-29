@@ -7,7 +7,7 @@ e_mail_subject = "Mööp"
 [smtp]
 sender = "test@example.com"
 server = "localhost"
-port = "25"
+port = 25
 username = "test"
 password = "example"
 auth_mechanism = "CramMd5"
