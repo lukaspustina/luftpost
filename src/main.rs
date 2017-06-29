@@ -8,7 +8,7 @@ extern crate tokio_core;
 
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
-use luftpost::{Config, Measurement, Sensor};
+use luftpost::{Config, Mailer, Measurement, Sensor};
 use luftpost::config::EmailCondition;
 use std::io;
 use std::path::Path;
@@ -72,7 +72,7 @@ fn run() -> Result<i32> {
 
     if let Some(ref smtp) = config.smtp {
         println!("Sending E-Mails:");
-        let mut transport = luftpost::create_transport(smtp)?;
+        let mut mailer = Mailer::create_mailer(smtp)?;
         let results = checked_measurements
             .iter()
             .filter(|cm|
@@ -83,7 +83,7 @@ fn run() -> Result<i32> {
             )
             .map(|cm| {
                 println!("{}", cm.measurement.sensor.name);
-                luftpost::mail_measurement(&cm.measurement, &mut transport).map_err(|e| e.into())
+                mailer.mail_measurement(&cm.measurement).map_err(|e| e.into())
             });
         results.collect::<::std::result::Result<Vec<()>, Error>>()?;
     }

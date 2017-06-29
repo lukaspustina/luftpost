@@ -24,41 +24,60 @@ pub enum Transport {
     Stub(StubEmailTransport)
 }
 
-pub fn create_transport(smtp: &Smtp) -> Result<Transport> {
-    let mut builder = SmtpTransportBuilder::new(
-        (&smtp.server[..], smtp.port.unwrap_or_else(|| SUBMISSION_PORT))).unwrap()
-        .hello_name("my.hostname.tld")
-        .security_level(SecurityLevel::Opportunistic)
-        .smtp_utf8(true)
-        .connection_reuse(true);
-    if smtp.username.is_some() && smtp.password.is_some() && smtp.auth_mechanism.is_some() {
-        builder = builder
-            .credentials(smtp.username.as_ref().unwrap(), smtp.password.as_ref().unwrap())
-            .authentication_mechanism(smtp.auth_mechanism.unwrap());
+pub struct Mailer<'a> {
+    pub transport: Transport,
+    pub from_addr: &'a str,
+    pub text_template: &'a str,
+    pub html_template: &'a str,
+}
+
+impl<'a> Mailer<'a> {
+    pub fn create_mailer(smtp: &'a Smtp) -> Result<Mailer<'a>> {
+        let mut builder = SmtpTransportBuilder::new(
+            (&smtp.server[..], smtp.port.unwrap_or_else(|| SUBMISSION_PORT))).unwrap()
+            .hello_name("my.hostname.tld")
+            .security_level(SecurityLevel::Opportunistic)
+            .smtp_utf8(true)
+            .connection_reuse(true);
+        if smtp.username.is_some() && smtp.password.is_some() && smtp.auth_mechanism.is_some() {
+            builder = builder
+                .credentials(smtp.username.as_ref().unwrap(), smtp.password.as_ref().unwrap())
+                .authentication_mechanism(smtp.auth_mechanism.unwrap());
+        }
+        let transport = builder.build();
+
+        let mailer = Mailer {
+            transport: Transport::Smtp(transport),
+            from_addr: &smtp.sender,
+            text_template: &smtp.text_template,
+            html_template: &smtp.html_template,
+        };
+
+        Ok(mailer)
     }
-    let mailer = builder.build();
 
-    Ok(Transport::Smtp(mailer))
-}
+    pub fn mail_measurement(&mut self, measurement: &Measurement) -> Result<()> {
+        let (text, html) = create_body(measurement, self.text_template, self.html_template)?;
+        let email = EmailBuilder::new()
+            .to(&measurement.sensor.e_mail_addr.as_ref().unwrap()[..])
+            .from(self.from_addr)
+            .subject(&measurement.sensor.e_mail_subject.as_ref().unwrap())
+            .alternative(&text, &html)
+            .build()?;
+        self.send(email)
+    }
 
-pub fn mail_measurement(measurement: &Measurement, transport: &mut Transport) -> Result<()> {
-    let email = EmailBuilder::new()
-        .to(&measurement.sensor.e_mail_addr.as_ref().unwrap()[..])
-        .from("user@localhost")
-        .subject(&measurement.sensor.e_mail_subject.as_ref().unwrap())
-        .body("Hello World!")
-        .build()?;
-    transport.send(email)
-}
-
-impl Transport {
     fn send(&mut self, email: Email) -> Result<()> {
-        match *self {
+        match self.transport {
             Transport::File(ref mut file) => file.send(email).map(|_| ()).map_err(|e| e.into()),
             Transport::Smtp(ref mut smtp) => smtp.send(email).map(|_| ()).map_err(|e| e.into()),
             Transport::Stub(ref mut stub) => stub.send(email).map(|_| ()).map_err(|e| e.into()),
         }
     }
+}
+
+fn create_body(measurement: &Measurement, text_template: &str, html_template: &str) -> Result<(String, String)> {
+    Ok(("text".to_string(), "html".to_string()))
 }
 
 #[cfg(test)]
@@ -94,9 +113,14 @@ mod test {
             software_version: "NRZ-2017-089".to_string(),
             data_values: data_values,
         };
-        let mut transport = Transport::Stub(StubEmailTransport);
+        let mut mailer = Mailer {
+            transport: Transport::Stub(StubEmailTransport),
+            from_addr: "sender@example.com",
+            text_template: "{{ sensor.name }}",
+            html_template: "{{ sensor.name }}"
+        };
 
-        let res = mail_measurement(&measurement, &mut transport);
+        let res = mailer.mail_measurement(&measurement);
 
         assert!(res.is_ok());
     }

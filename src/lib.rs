@@ -20,7 +20,7 @@ pub mod sensor;
 
 pub use check::check_measurement;
 pub use config::Config;
-pub use mail::{create_transport, mail_measurement};
+pub use mail::Mailer;
 pub use measurement::Measurement;
 pub use sensor::{Sensor, create_sensor_reader};
 pub use output::print_measurements;

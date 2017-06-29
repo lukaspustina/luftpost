@@ -44,6 +44,10 @@ pub struct Smtp {
     pub password: Option<String>,
     #[serde(deserialize_with = "auth_mechanism")]
     pub auth_mechanism: Option<authentication::Mechanism>,
+    #[serde(default = "default_template")]
+    pub text_template: String,
+    #[serde(default = "default_template")]
+    pub html_template: String,
 }
 
 //fn deserialize_u64_or_empty_string<D>(deserializer: &mut D) -> Result<u64, D::Error> where D: Deserializer
@@ -75,6 +79,10 @@ where
     }
 
     deserializer.deserialize_string(MechanismVisitor)
+}
+
+fn default_template() -> String {
+    "{{ sensor.name }}".to_string()
 }
 
 #[derive(Debug, Deserialize)]
@@ -184,6 +192,12 @@ port = "25"
 username = "test"
 password = "example"
 auth_mechanism = "CramMd5"
+text_template = """Hello,
+
+your sensor {{ sensor.name }} just found a measurement exceeding a threashold."""
+html_template = """Hello,
+
+your sensor {{ sensor.name }} just found a measurement exceeding a threshold."""
 
 [[sensors]]
 name = "Min"
@@ -222,7 +236,8 @@ condition = 'ThresholdExceeded'
             smtp.auth_mechanism.unwrap(),
             authentication::Mechanism::CramMd5
         );
-
+        assert!(smtp.text_template.contains("{{ sensor.name }}"));
+        assert!(smtp.html_template.contains("{{ sensor.name }}"));
 
         assert_eq!(config.sensors.len(), 2);
         let s1 = &config.sensors[0];
