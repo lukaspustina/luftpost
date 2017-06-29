@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate error_chain;
 extern crate futures;
+extern crate handlebars;
 extern crate hyper;
 extern crate lettre;
 extern crate tokio_core;

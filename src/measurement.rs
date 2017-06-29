@@ -1,4 +1,5 @@
 use sensor::Sensor;
+use std::fmt;
 
 error_chain! {
     errors {
@@ -16,14 +17,7 @@ error_chain! {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Measurement {
-    pub sensor: Sensor,
-    pub software_version: String,
-    pub data_values: Vec<Value>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 pub enum Value {
     SDS_P1(f32),
@@ -53,6 +47,30 @@ impl<'a> From<(&'a str, f32)> for Value {
             _ => Value::UNKNOWN(type_str.to_string()),
         }
     }
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let printable = match *self {
+            Value::SDS_P1(v) => format!("PM 10 = {}", v),
+            Value::SDS_P2(v) => format!("PM 2.5 = {}", v),
+            Value::TEMPERATURE(v) => format!("Temperature = {}", v),
+            Value::HUMIDITY(v) => format!("Humidity = {}", v),
+            Value::SAMPLES(v) => format!("Samples = {}", v),
+            Value::MIN_MICRO(v) => format!("Min micro = {}", v),
+            Value::MAX_MICRO(v) => format!("Max Micro = {}", v),
+            Value::SIGNAL(v) => format!("Wifi signal = {}", v),
+            Value::UNKNOWN(ref v) => format!("Unknown = {}", v),
+        };
+        write!(f, "{}", printable)
+    }
+}
+
+#[derive(Debug, Serialize, PartialEq)]
+pub struct Measurement {
+    pub sensor: Sensor,
+    pub software_version: String,
+    pub data_values: Vec<Value>,
 }
 
 impl Measurement {
@@ -158,12 +176,12 @@ mod test {
         data_values.push(Value::MAX_MICRO(27599f32));
         data_values.push(Value::SIGNAL(-73f32));
         let expected = Measurement {
-            sensor: Sensor::new("A Sensor", "http://localhost"),
+            sensor: Sensor::new("A Sensor", "123456789", "http://localhost", "http://localhost"),
             software_version: "NRZ-2017-089".to_string(),
             data_values: data_values,
         };
 
-        let m = wire_to_measurement(Sensor::new("A Sensor", "http://localhost"), wire);
+        let m = wire_to_measurement(Sensor::new("A Sensor", "123456789", "http://localhost", "http://localhost"), wire);
 
         assert_eq!(m.unwrap(), expected);
     }
@@ -181,7 +199,7 @@ mod test {
             data_values: w_data_values,
         };
 
-        let res = wire_to_measurement(Sensor::new("A Sensor", "http://localhost"), wire);
+        let res = wire_to_measurement(Sensor::new("A Sensor", "123456789", "http://localhost", "http://localhost"), wire);
 
         match res {
             Err(Error(ErrorKind::InvalidValueType(_), _)) => assert!(true),
@@ -202,7 +220,7 @@ mod test {
             data_values: w_data_values,
         };
 
-        let res = wire_to_measurement(Sensor::new("A Sensor", "http://localhost"), wire);
+        let res = wire_to_measurement(Sensor::new("A Sensor", "123456789", "http://localhost", "http://localhost"), wire);
 
         match res {
             Err(Error(ErrorKind::InvalidValue(_), _)) => assert!(true),

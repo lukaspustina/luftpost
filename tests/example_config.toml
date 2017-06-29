@@ -14,11 +14,15 @@ auth_mechanism = "CramMd5"
 
 [[sensors]]
 name = "Feinstaub"
-uri = "http://feinstaub/data.json"
+id = "12345678"
+ui_uri = "http://feinstaub"
+data_uri = "http://feinstaub/data.json"
 threshold_pm10 = 10.0
 threshold_pm2 = 10.0
 
 [[sensors]]
 name = "Feinstaub 2"
-uri = "http://feinstaub/data.json"
+id = "12345678"
+ui_uri = "http://feinstaub"
+data_uri = "http://feinstaub/data.json"
 

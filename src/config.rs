@@ -17,7 +17,7 @@ error_chain! {
 	}
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "condition")]
 #[derive(PartialOrd, PartialEq, Eq)]
 #[derive(Clone, Copy)]
@@ -167,7 +167,9 @@ mod test {
 
 [[sensors]]
 name = "Feinstaub"
-uri = "http://feinstaub/data.json"
+id = "12345678"
+ui_uri = "http://feinstaub"
+data_uri = "http://feinstaub/data.json"
 "#;
 
         let config = Config::parse_toml(config_str).unwrap();
@@ -201,11 +203,15 @@ your sensor {{ sensor.name }} just found a measurement exceeding a threshold."""
 
 [[sensors]]
 name = "Min"
-uri = "http://feinstaub/data.json"
+id = "12345678"
+ui_uri = "http://feinstaub"
+data_uri = "http://feinstaub/data.json"
 
 [[sensors]]
 name = "Max"
-uri = "http://feinstaub/data.json"
+id = "12345678"
+ui_uri = "http://feinstaub"
+data_uri = "http://feinstaub/data.json"
 threshold_pm10 = 20.0
 threshold_pm2 = 20.0
 e_mail_addr = "another_test@example.com"

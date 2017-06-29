@@ -38,11 +38,13 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [ ] Send E-Mails
 
-        * [ ] Send E-Mails
+        * [X] Send E-Mails
+
+        * [X] Add public sensor ID and add graphs to HTML body
 
         * [ ] Move to Futures
 
-        * [ ] Make sure e_mail_addr and e_mail_subject are set; at least in defauls
+        * [ ] Make sure e_mail_addr and e_mail_subject are set; at least in defaults
 
     * [ ] Show full error stack
 

@@ -20,11 +20,13 @@ error_chain! {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[derive(PartialEq)]
 pub struct Sensor {
     pub name: String,
-    pub uri: String,
+    pub id: String,
+    pub ui_uri: String,
+    pub data_uri: String,
     pub threshold_pm10: Option<f32>,
     pub threshold_pm2: Option<f32>,
     pub e_mail_addr: Option<String>,
@@ -33,10 +35,12 @@ pub struct Sensor {
 }
 
 impl Sensor {
-    pub fn new<T: Into<String>>(name: T, uri: T) -> Sensor {
+    pub fn new<T: Into<String>>(name: T, id: T, ui_uri: T, data_uri: T) -> Sensor {
         Sensor {
             name: name.into(),
-            uri: uri.into(),
+            id: id.into(),
+            ui_uri: ui_uri.into(),
+            data_uri: data_uri.into(),
             threshold_pm10: None,
             threshold_pm2: None,
             e_mail_addr: None,

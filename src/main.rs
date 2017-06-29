@@ -119,7 +119,7 @@ fn build_cli() -> App<'static, 'static> {
 fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measurement>> {
     let client = luftpost::create_sensor_reader(core);
     let work = sensors.into_iter().map(|s| {
-        let uri = s.uri.parse().unwrap();
+        let uri = s.data_uri.parse().unwrap();
         let response = client.get(uri);
         s.read_measurement(response)
     });

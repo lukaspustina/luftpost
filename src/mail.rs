@@ -1,4 +1,5 @@
 use config::Smtp;
+use handlebars::{Handlebars, RenderError, RenderContext, Helper};
 use measurement::Measurement;
 use lettre::email::{Email, EmailBuilder};
 use lettre::transport::EmailTransport;
@@ -15,6 +16,8 @@ error_chain!{
         SmtpTransportError(::lettre::transport::smtp::error::Error);
         StubTransportError(::lettre::transport::stub::error::Error);
         EmailFormatError(::lettre::email::error::Error);
+        TemplateError(::handlebars::TemplateRenderError);
+        IoError(::std::io::Error);
     }
 }
 
@@ -57,12 +60,13 @@ impl<'a> Mailer<'a> {
     }
 
     pub fn mail_measurement(&mut self, measurement: &Measurement) -> Result<()> {
-        let (text, html) = create_body(measurement, self.text_template, self.html_template)?;
+        let (subject, text, html) = create_body(measurement, &measurement.sensor.e_mail_subject.as_ref().unwrap(),
+                                                self.text_template, self.html_template)?;
         let email = EmailBuilder::new()
             .to(&measurement.sensor.e_mail_addr.as_ref().unwrap()[..])
             .from(self.from_addr)
-            .subject(&measurement.sensor.e_mail_subject.as_ref().unwrap())
-            .alternative(&text, &html)
+            .subject(&subject)
+            .alternative(&html, &text)
             .build()?;
         self.send(email)
     }
@@ -76,8 +80,26 @@ impl<'a> Mailer<'a> {
     }
 }
 
-fn create_body(measurement: &Measurement, text_template: &str, html_template: &str) -> Result<(String, String)> {
-    Ok(("text".to_string(), "html".to_string()))
+fn create_body(measurement: &Measurement, subject_template: &str, text_template: &str, html_template: &str) -> Result<(String, String, String)> {
+    let mut handlebars = Handlebars::new();
+    handlebars.register_helper("data_value", Box::new(render_data_value));
+    let subject = handlebars.template_render(subject_template, measurement)?;
+    let text = handlebars.template_render(text_template, measurement)?;
+    let html = handlebars.template_render(html_template, measurement)?;
+
+    Ok((subject, text, html))
+}
+
+fn render_data_value(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> ::std::result::Result<(), RenderError> {
+    let param = h.param(0).unwrap();
+    let k_v = param.value().as_object().unwrap();
+    let kind = k_v.keys().next().unwrap();
+    let value = k_v.values().next().unwrap().as_f64().unwrap();
+
+    let f = format!("{} = {}", kind, value);
+    rc.writer.write(f.as_bytes())?;
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -92,7 +114,9 @@ mod test {
     fn mail_measurement_okay() -> () {
         let sensor = Sensor {
             name: "A Sensor".to_string(),
-            uri: "http://localhost".to_string(),
+            id: "123456789".to_string(),
+            ui_uri: "http://localhost".to_string(),
+            data_uri: "http://localhost".to_string(),
             threshold_pm10: Some(10.0),
             threshold_pm2: Some(2.0),
             e_mail_addr: Some("test@example.com".to_string()),
