@@ -82,7 +82,7 @@ impl<'a> Mailer<'a> {
 
 fn create_body(measurement: &Measurement, subject_template: &str, text_template: &str, html_template: &str) -> Result<(String, String, String)> {
     let mut handlebars = Handlebars::new();
-    handlebars.register_helper("data_value", Box::new(render_data_value));
+    handlebars.register_helper("number", Box::new(handlebars_number_formatter));
     let subject = handlebars.template_render(subject_template, measurement)?;
     let text = handlebars.template_render(text_template, measurement)?;
     let html = handlebars.template_render(html_template, measurement)?;
@@ -90,13 +90,11 @@ fn create_body(measurement: &Measurement, subject_template: &str, text_template:
     Ok((subject, text, html))
 }
 
-fn render_data_value(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> ::std::result::Result<(), RenderError> {
+fn handlebars_number_formatter(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> ::std::result::Result<(), RenderError> {
     let param = h.param(0).unwrap();
-    let k_v = param.value().as_object().unwrap();
-    let kind = k_v.keys().next().unwrap();
-    let value = k_v.values().next().unwrap().as_f64().unwrap();
+    let number = param.value().as_f64().unwrap();
 
-    let f = format!("{} = {}", kind, value);
+    let f = format!("{:.2}", number);
     rc.writer.write(f.as_bytes())?;
 
     Ok(())
