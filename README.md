@@ -14,7 +14,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
 ## Todos
 
-* [ ] Features
+* [X] Features
 
     * [X] Read measurement from multiple local sensors by id
 
@@ -36,11 +36,11 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Check thresholds
 
-    * [ ] Send E-Mails
+    * [X] Send E-Mails
 
         * [X] Send E-Mails
 
-        * [ ] HTML E-Mails with template engine
+        * [X] HTML E-Mails with template engine
 
         * [X] Add public sensor ID and add graphs to HTML body
 
