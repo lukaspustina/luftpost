@@ -1,0 +1,39 @@
+language: rust
+rust:
+- stable
+- beta
+- nightly
+branches:
+  only:
+  - master
+  - travis-ci
+  - "/^v.*$/"
+os:
+- linux
+- osx
+matrix:
+  allow_failures:
+  - rust: nightly
+before_deploy:
+- cd /home/travis/build/lukaspustina/luftpost; cargo build --release
+- cd /home/travis/build/lukaspustina/luftpost/distribution/deb; BIN_DIR=../../target/release
+  ARCH=amd64 VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
+deploy:
+  provider: packagecloud
+  username: lukaspustina
+  token:
+    secure: RpzXa8goB7UhnwGI7k6UQw8fhGTXkdCJ4zqBqwn9gseJjGAUeRejph2LPArE8r/yXNj72+1h/QMpljX0ACeMhyjkz7qbw0AifDucGZwWeTQiqU/xNf6uAzOlxdANRjPVKiJxKspgnlv20KpeYPHsjEi9R9TuUvlzvmGh69cHyCwABZxLesTEQAbhzTCLmwRA3Bd6242PGsfJ7dup/8pNixLzypc0rVMNebMQHFaBJDLL+iucu/yR4Ki402rmku8IEnkoYZ7++YWViFsgtZcoCe+2kxpsuXoO7jpDMn0v/jLOFQKfe0pdoOHbIq5YJfsHTFqJIChDPesCA5d51RGrT+pYBVEx4ejtjotVqQ9+3DY/V7428oKJxc6ZN7+4EU1WSSpRkUCfNAYma3XDKsYWuMtMa4g3la/ArNV9MOoDLfzlHlBTAkStBD7ic2msUCG+HSX6frrBvE20VLU5/ktWs1mD2M/F0Ki16L7VQ2euuCNEIZT6UpjYR/J2tX9T32PoB3uIGkaLXYkbR9v5nyG8Ozh9Yl0D7r5Y3AHmb38feMwssiUMWBmnyF3TVp8FXAOJCf6vwvMQk5JVPMuPpstc/QBjDKJFLZtqXIQ/wd2jaC5E7lWJHCGDk6oWQ0Ew/c057TYJQV+b1uGTVEI5rVX8p8MMh+q4piez0rZLDUeHUO0=
+  repository: opensource
+  dist: ubuntu/trusty
+  package_glob: "**/*.deb"
+  skip_cleanup: true
+  on:
+    tags: true
+    condition:
+    - "$TRAVIS_OS_NAME == linux"
+    - "$TRAVIS_RUST_VERSION == stable"
+after_deploy:
+- cd /home/travis/build/lukaspustina/luftpost; cargo publish --token ${CRATES_IO_TOKEN}
+env:
+  global:
+    secure: UY05iji5GgQWuktTBt9K44z/v7cmMiT4tbmNKWqLy9RIpFLRe6+0maajuATqy1oL3i0e8pFORs/SxZSLP+6j+BkIhGNoyl2UA7sZVIIbrj/9J5NwenpDpidunHsObln8aRlgWfmRcdnyvynVjchKBHKZqlkBMYc1QA680gJ6bBe9hnjRSlKu6+5Da3IXpkFEBL02Ln4u8F6huU/Uu31AtYJNUzXkUZr/vpxcTtXMmngSA1yRL6KJWq9iC2oGnIHIJZREkXs7ceO512vOKp2hx5+Z0mA5av2+eL9K3+wsmTybRKuTaCc+LZqic9rXGTj5FHOmwD+eYOeF58X4hCvmY2rXHOP8s3q78+ZiQMP2K5s1qLDnxG4Ng104pRa+A9tYUsUbBJd+PCOMFvK7Ssj8lV1DqV/koCDPAfV6lbaEZ739qJVoA3ummWFxg8X0x6Bohvp/mRiM0p2orplOriyotPfiFTct0Cgj/txtlfl4Dvjxs2UBFFgwC7Ll7TkjvPHNW5CS9BCu4RwXcUI422mwvNsBk2IJHNN7Lu3lyHrTMgJ9Zhg9oOGl+UEWTQRXvK8ZThxsgJ9k4phf8qdJsiA3pMM3nnalPH3AEq24NwenH8XoSQf7jk2fZ1cXI1nTuPUUhKHwlbvNICXwEUBBX7th0vz1fqpVQLPQCrFF9TPxTBI=
