@@ -40,13 +40,9 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
         * [X] Send E-Mails
 
+        * [ ] HTML E-Mails with template engine
+
         * [X] Add public sensor ID and add graphs to HTML body
-
-        * [ ] Move to Futures
-
-        * [ ] Make sure e_mail_addr and e_mail_subject are set; at least in defaults
-
-    * [ ] Show full error stack
 
 * [ ] Infrastructure
 
@@ -69,7 +65,14 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
 * [ ] Milestone 0.2
 
-    * Progress bar for terminal operation
+    * [ ] Send E-Mails
 
-    * HTML E-Mails with template engine
+        * [ ] Move to Futures
+
+        * [ ] Make sure e_mail_addr and e_mail_subject are set; at least in defaults
+
+    * [ ] Show full error stack
+
+    * [ ] Progress bar for terminal operation
+
 
