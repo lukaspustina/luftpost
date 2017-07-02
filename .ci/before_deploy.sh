@@ -25,7 +25,7 @@ main() {
     tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
 
     cd $src/distribution/deb
-    SRC_DIR=../../ BIN=target/$TARGET/release/luftpost ARCH=$DEPLOY_ARCH VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
+    SRC_DIR=$src BIN=$src/target/$TARGET/release/luftpost ARCH=$DEPLOY_ARCH VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
 
     cd $src
     rm -rf $stage
