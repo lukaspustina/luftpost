@@ -7,7 +7,7 @@ environment:
     MSYS2: 1
   - TARGET: i686-pc-windows-gnu
     BITS: 32
-    MSYS: 1
+    MSYS2: 1
 install:
     # install OpenSSL
   - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-1_1_0f.exe"
