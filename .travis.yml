@@ -53,7 +53,6 @@ after_script: set +e
 
 before_deploy:
   - sh .ci/before_deploy.sh
-  - cd /home/travis/build/lukaspustina/luftpost/distribution/deb; if [ -n "$DEPLOY_ARCH" ]; then SRC_DIR=../../ ARCH=$DEPLOY_ARCH VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package; fi
 
 deploy:
   - provider: packagecloud
