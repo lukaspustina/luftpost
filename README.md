@@ -52,8 +52,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [ ] Travis: Build Debian packages (x86, ARM)
 
-      https://github.com/travis-ci/travis-ci/issues/3376
-
+    * [ ] Travis, Appveyor: Push binaries to GitHub realses
 
 * [ ] Milestone 0.1
 
