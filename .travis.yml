@@ -14,21 +14,17 @@ env:
 matrix:
   include:
     # Linux
-    - env: TARGET=i686-unknown-linux-gnu
-    - env: TARGET=i686-unknown-linux-musl
     - env: TARGET=x86_64-unknown-linux-gnu
     - env: TARGET=x86_64-unknown-linux-musl
 
     # OSX
-    - env: TARGET=i686-apple-darwin
-      os: osx
     - env: TARGET=x86_64-apple-darwin
       os: osx
 
     # Raspi
     - env: TARGET=armv7-unknown-linux-gnueabihf
 
-    # Testing future Rust version
+    # Testing future Rust versions
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: beta
     - env: TARGET=x86_64-unknown-linux-gnu
