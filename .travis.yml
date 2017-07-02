@@ -14,7 +14,7 @@ env:
 matrix:
   include:
     # Linux
-    - env: TARGET=x86_64-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-gnu DEPLOY_ARCH=amd64
     - env: TARGET=x86_64-unknown-linux-musl
 
     # OSX
@@ -22,7 +22,7 @@ matrix:
       os: osx
 
     # Raspi
-    - env: TARGET=armv7-unknown-linux-gnueabihf
+    - env: TARGET=armv7-unknown-linux-gnueabihf DEPLOY_ARCH=armhf
 
     # Testing future Rust versions
     - env: TARGET=x86_64-unknown-linux-gnu
@@ -51,28 +51,25 @@ script:
 
 after_script: set +e
 
-#before_deploy:
-#  - sh .ci/before_deploy.sh
-#
-#before_deploy:
-#- cd /home/travis/build/lukaspustina/luftpost; cargo build --release
-#- cd /home/travis/build/lukaspustina/luftpost/distribution/deb; BIN_DIR=../../target/release ARCH=amd64 VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
-#
-#deploy:
-#  provider: packagecloud
-#  username: lukaspustina
-#  token:
-#    secure: rkn1URi+xzRvqaGQA7ggOO6q8QVhWBpx1sdAsSYvZWRBKHT8rcMruUgkvklxfkRrSTEA9GESjeaphMlorKCxN4In8jxn3BqpDBeuJ5uIRiM7X9lyc8HczAzHmUs0jhjxqwidtu8YkgslkNWJ8iVULAB0yMgbNqBXj0Xx3jMZ7h8V86C/eqMlQ2+qsyIdojqJQA0yOqBfnOlJCJQro0oXbsPivR/uYEDRRqhdtSr4D1ry/g4qfajBxLbhBXjLigQwNHNz1umd8YG0aiK8NBqNFMQ0p4pwdfsT6VsgDk5gL2tAXJWtT8co8oJBaFwz+xSwrWnP8jrrv5chgSjM23FcYs6pHkefKxwNWvHMVuirs/o631NhAMJsVPG3ekzaNyN1fPMZzeCJwYAc9+MMGJE3AqpRyNrl+EIIBWG0E0wAT2RL/1U1dO8J0gnPMus5wmoWyY8LLtTHkHAkvyvjafXmih9lgvrJkObByE3tvTvDNHMzrWFVFBLaIdsCiJ/8Fm7rYFtBiP/UbHbQENLe2Uql3klH0PkPmsBADlkIkdFiS9UQfVe5BBX138P9p15xetT3qpVTAsDkz/nyV0gi9CrezUmJBkqKx93pVptv9O/NkBBUHd3pqr/eWmzAM2Xp0tcoXnZC4yGE8DNDEI8jvY5v8djcGsst2fOd0/VKIgS40aI=
-#  repository: opensource
-#  dist: ubuntu/trusty
-#  package_glob: "**/*.deb"
-#  skip_cleanup: true
-#  on:
-#    tags: true
-#    condition:
-#    - "$TRAVIS_OS_NAME == linux"
-#    - "$TRAVIS_RUST_VERSION == stable"
-#
-#after_deploy:
-#- cd /home/travis/build/lukaspustina/luftpost; cargo publish --token ${CRATES_IO_TOKEN}
+before_deploy:
+  - sh .ci/before_deploy.sh
+  - cd /home/travis/build/lukaspustina/luftpost/distribution/deb; if [ -n "$DEPLOY_ARCH" ]; then SRC_DIR=../../ ARCH=$DEPLOY_ARCH VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package; fi
+
+deploy:
+  - provider: packagecloud
+    username: lukaspustina
+    token:
+      secure: rkn1URi+xzRvqaGQA7ggOO6q8QVhWBpx1sdAsSYvZWRBKHT8rcMruUgkvklxfkRrSTEA9GESjeaphMlorKCxN4In8jxn3BqpDBeuJ5uIRiM7X9lyc8HczAzHmUs0jhjxqwidtu8YkgslkNWJ8iVULAB0yMgbNqBXj0Xx3jMZ7h8V86C/eqMlQ2+qsyIdojqJQA0yOqBfnOlJCJQro0oXbsPivR/uYEDRRqhdtSr4D1ry/g4qfajBxLbhBXjLigQwNHNz1umd8YG0aiK8NBqNFMQ0p4pwdfsT6VsgDk5gL2tAXJWtT8co8oJBaFwz+xSwrWnP8jrrv5chgSjM23FcYs6pHkefKxwNWvHMVuirs/o631NhAMJsVPG3ekzaNyN1fPMZzeCJwYAc9+MMGJE3AqpRyNrl+EIIBWG0E0wAT2RL/1U1dO8J0gnPMus5wmoWyY8LLtTHkHAkvyvjafXmih9lgvrJkObByE3tvTvDNHMzrWFVFBLaIdsCiJ/8Fm7rYFtBiP/UbHbQENLe2Uql3klH0PkPmsBADlkIkdFiS9UQfVe5BBX138P9p15xetT3qpVTAsDkz/nyV0gi9CrezUmJBkqKx93pVptv9O/NkBBUHd3pqr/eWmzAM2Xp0tcoXnZC4yGE8DNDEI8jvY5v8djcGsst2fOd0/VKIgS40aI=
+    repository: opensource
+    dist: ubuntu/trusty
+    package_glob: "**/*.deb"
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+      - "$TRAVIS_OS_NAME == linux"
+      - "$DEPLOY_ARCH"
+
+after_deploy:
+- cd /home/travis/build/lukaspustina/luftpost; cargo publish --token ${CRATES_IO_TOKEN}
 
