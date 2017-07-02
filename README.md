@@ -46,7 +46,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
 * [ ] Infrastructure
 
-    * [ ] Travis CI, appveyor
+    * [X] Travis CI, appveyor
 
     * [ ] Travis: Cross compile for ARM
 
