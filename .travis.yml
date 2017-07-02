@@ -68,6 +68,17 @@ deploy:
       condition:
       - "$TRAVIS_OS_NAME == linux"
       - "$DEPLOY_ARCH"
+  - provider: releases
+    api_key:
+      secure: pRvyDo1vbnK6Q4N7CUJ8px3LjwQP8sIfZ+OJeyuHXiWATDoAHFq6OM3gteg4g01BV6b51fWsharcDb7aD6qmmzGOyf5JJLKRfkIpff196FDmNIDT39hWvBNPV/nPd58g7nsH4IK+PWNOq4FSP2Nn5BxYndIlRz76NNH2XJnUvJZzeI0/ouD1a45AVYnV12Ke2cmHktq/MXN1+uKq21PGfrRlmCUcgezdbJoV59h6qTq7U1zZkdfNbcrIROko2ZVkSgnWrA+Pu/+nDwSlQEKY7Te8XspWKxrDcTJ/quussEB8zN9IntLLktM3TgHTUUZdN+WNDB4rS2K1+tUVV58o6wJJ9jOIv8OMh21EHeH29dpkrYjcyYl5+MajxZa3GiarwdMAZrsRTD3pjjv1zGXK6PSym/CWzcWZUYOnytwwHH+E3XsieVjBSaenBXT4hJVzVfyiS0J+vN4R2YF3ZyFU2NPx16MBdb4vW6S7faQpnxScMRNavHhJanugTbmZgz2nFBA6uEDy/0mJFxAzWadWxA+J4PKogrcNJMAmygKYd5jVNuXDNi9JKKWSQRaWyHlOXQfCEovQY8Gm8rMAnsIuyyG9KMN/VViveaqys7KWnsGnpYViQi7mpGdYv9LVVuf5z0DWvqGR9tCHP0/++6x5FEYiPGqjubFz1pptB59WA9E=
+    file_glob: true
+    file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+      - "$TRAVIS_OS_NAME == linux"
+      - "$DEPLOY_ARCH"
 
 after_deploy:
 - cd /home/travis/build/lukaspustina/luftpost; cargo publish --token ${CRATES_IO_TOKEN}
