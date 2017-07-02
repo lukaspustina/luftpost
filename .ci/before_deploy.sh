@@ -23,8 +23,11 @@ main() {
 
     cd $stage
     tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
-    cd $src
 
+    cd $src/distribution/deb
+    SRC_DIR=../../ BIN=target/$TARGET/release/luftpost ARCH=$DEPLOY_ARCH VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
+
+    cd $src
     rm -rf $stage
 }
 
