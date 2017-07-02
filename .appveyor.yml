@@ -4,30 +4,37 @@ environment:
   matrix:
   - TARGET: x86_64-pc-windows-msvc
     ARCH: amd64
+    BITS: 64
     VS: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
     OPENSSL: C:\OpenSSL-Win32
   - TARGET: x86_64-pc-windows-msvc
     ARCH: amd64
+    BITS: 64
     VS: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat
     OPENSSL: C:\OpenSSL-Win32
   - TARGET: i686-pc-windows-msvc
     ARCH: x86
+    BITS: 32
     VS: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
     OPENSSL: C:\OpenSSL-Win32
   - TARGET: i686-pc-windows-msvc
     ARCH: x86
+    BITS: 32
     VS: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat
     OPENSSL: C:\OpenSSL-Win32
   - TARGET: x86_64-pc-windows-gnu
+    BITS: 64
     MSYS_BITS: 64
     OPENSSL: C:\OpenSSL-Win32
   - TARGET: i686-pc-windows-gnu
+    BITS: 32
     MSYS_BITS: 32
     OPENSSL: C:\OpenSSL-Win32
 install:
-  - SET OPENSSL_INCLUDE_DIR=%OPENSSL%\include
-  - SET OPENSSL_LIB_DIR=%OPENSSL%\bin
-  - CP %OPENSSL%\bin\ssleay32.dll %OPENSSL%\bin\libssl32.dll
+    # install OpenSSL
+  - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-1_1_0f.exe"
+  - Win%BITS%OpenSSL-1_1_0f.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
+  - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
   - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-1.18.0-${env:TARGET}.exe" -FileName "rust-stable.exe"
   - rust-stable.exe /VERYSILENT /NORESTART /DIR="C:\Program Files (x86)\Rust"
   - if defined VS call "%VS%" %ARCH%
