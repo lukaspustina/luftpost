@@ -268,6 +268,14 @@ condition = 'ThresholdExceeded'
     }
 
     #[test]
+    pub fn from_minimal_file() -> () {
+        let path = Path::new("tests/luftpost-minimal.example.conf");
+
+        let config = Config::from_file(&path).unwrap();
+
+        assert_eq!(config.sensors.len(), 1);
+    }
+    #[test]
     pub fn from_file_not_exists() -> () {
         let path = Path::new("tests/does_not_exist.conf");
 
