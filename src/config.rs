@@ -260,16 +260,16 @@ condition = 'ThresholdExceeded'
 
     #[test]
     pub fn from_file() -> () {
-        let path = Path::new("tests/example_config.toml");
+        let path = Path::new("tests/luftpost.example.conf");
 
         let config = Config::from_file(&path).unwrap();
 
-        assert_eq!(config.sensors.len(), 2);
+        assert_eq!(config.sensors.len(), 1);
     }
 
     #[test]
     pub fn from_file_not_exists() -> () {
-        let path = Path::new("tests/does_not_exist.toml");
+        let path = Path::new("tests/does_not_exist.conf");
 
         let config = Config::from_file(path.into());
 

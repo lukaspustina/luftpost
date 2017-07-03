@@ -21,7 +21,7 @@ $(BASE_NAME)/DEBIAN/control: templates/DEBIAN/control $(BASE_NAME)/usr/bin/$(BIN
 $(BASE_NAME)/usr/bin/$(BIN_NAME): $(BIN) $(BASE_NAME)/usr/bin
 	cp $< $@
 
-$(BASE_NAME)/etc/$(BASE_NAME)/$(BASE_NAME).example.conf: $(SRC_DIR)/tests/example_config.toml $(BASE_NAME)/etc/$(BASE_NAME)
+$(BASE_NAME)/etc/$(BASE_NAME)/$(BASE_NAME).example.conf: $(SRC_DIR)/tests/luftpost.example.conf $(BASE_NAME)/etc/$(BASE_NAME)
 	cp $< $@
 
 $(BASE_NAME)/DEBIAN/postinst: templates/DEBIAN/postinst
