@@ -1,39 +1,85 @@
+# Based on the "trust" template v0.1.1
+# https://github.com/japaric/trust/tree/v0.1.1
+
+dist: trusty
 language: rust
-rust:
-- stable
-- beta
-- nightly
+services: docker
+sudo: required
+
+env:
+  global:
+    - CRATE_NAME=luftpost
+    - secure: DQqW6qUEtp5tWLjrgolxHmxRYzJsiK63n0hHl2as+YG54wYsiOurZVWdMnSs5QPJbhJ/UzdWCdi5a9MdBdVSiGjZB+3KNEhhmzSv/8Ed8a43cAgqzXPuyDNSNrbOcfxbo5QeFufPGc1Mv+HOpuYgeb6a+Cx6kad82nduP+MfY8dGi99IiapHgKpi/+Pfhf2jjYjIar9nzTHQfzDvshCCaDycaqMVuGrnQs4R0PgYOmBNyEqgzet0bpWu71osnc+lKZtlg01R12cwYxTmwaaNzBwO0058pv8gjuizLKgAmLqVJFOYQ1BAdPKC9CwvjplroJBvA4O0evI8y7nlVjNb5b8wzgaYaMvEeZL5DZQTYdNEgN5A+zbr4pifWekVom3Bsm8MkZPoH2cQpt+uxfgiA87U+ctdMWJOxBO4MHZVAN8SCEIq7P4n6bfOKbnQp3r0npCXFwQsSIc94gA7c+fvUSNyz5d94gBYtRg06UnUNsTn2tUWwv+4yCYqM++WuCBI0sQiwnXOqJqkcI5Grh6Vi0y33URjO66ZxNF6ymgiSyST9JSq/RteS1k30pLgRBDEvGsOdQ4+coDW240LqV6oMsb4t7P0rY45knK/ITSNs4zb0p5gPXJpm2iRd3dmbNev7tJ0y4kAleYE/TRCXLG6ijwyLDDKJEClekR980Bec+A=
+
+matrix:
+  include:
+    # Linux
+    - env: TARGET=x86_64-unknown-linux-gnu DEPLOY_ARCH=amd64
+    - env: TARGET=x86_64-unknown-linux-musl
+
+    # OSX
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+    # Raspi
+    - env: TARGET=armv7-unknown-linux-gnueabihf DEPLOY_ARCH=armhf
+
+    # Testing future Rust versions
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: beta
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: nightly
+
+  allow_failures:
+  - rust: beta
+  - rust: nightly
+
 branches:
   only:
   - master
   - travis-ci
   - "/^v.*$/"
-os:
-- linux
-- osx
-matrix:
-  allow_failures:
-  - rust: nightly
+
+before_install: set -e
+
+install:
+  - sh .ci/install.sh
+  - source ~/.cargo/env || true
+
+script:
+  - bash .ci/script.sh
+
+after_script: set +e
+
 before_deploy:
-- cd /home/travis/build/lukaspustina/luftpost; cargo build --release
-- cd /home/travis/build/lukaspustina/luftpost/distribution/deb; BIN_DIR=../../target/release
-  ARCH=amd64 VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
+  - sh .ci/before_deploy.sh
+
 deploy:
-  provider: packagecloud
-  username: lukaspustina
-  token:
-    secure: rkn1URi+xzRvqaGQA7ggOO6q8QVhWBpx1sdAsSYvZWRBKHT8rcMruUgkvklxfkRrSTEA9GESjeaphMlorKCxN4In8jxn3BqpDBeuJ5uIRiM7X9lyc8HczAzHmUs0jhjxqwidtu8YkgslkNWJ8iVULAB0yMgbNqBXj0Xx3jMZ7h8V86C/eqMlQ2+qsyIdojqJQA0yOqBfnOlJCJQro0oXbsPivR/uYEDRRqhdtSr4D1ry/g4qfajBxLbhBXjLigQwNHNz1umd8YG0aiK8NBqNFMQ0p4pwdfsT6VsgDk5gL2tAXJWtT8co8oJBaFwz+xSwrWnP8jrrv5chgSjM23FcYs6pHkefKxwNWvHMVuirs/o631NhAMJsVPG3ekzaNyN1fPMZzeCJwYAc9+MMGJE3AqpRyNrl+EIIBWG0E0wAT2RL/1U1dO8J0gnPMus5wmoWyY8LLtTHkHAkvyvjafXmih9lgvrJkObByE3tvTvDNHMzrWFVFBLaIdsCiJ/8Fm7rYFtBiP/UbHbQENLe2Uql3klH0PkPmsBADlkIkdFiS9UQfVe5BBX138P9p15xetT3qpVTAsDkz/nyV0gi9CrezUmJBkqKx93pVptv9O/NkBBUHd3pqr/eWmzAM2Xp0tcoXnZC4yGE8DNDEI8jvY5v8djcGsst2fOd0/VKIgS40aI=
-  repository: opensource
-  dist: ubuntu/trusty
-  package_glob: "**/*.deb"
-  skip_cleanup: true
-  on:
-    tags: true
-    condition:
-    - "$TRAVIS_OS_NAME == linux"
-    - "$TRAVIS_RUST_VERSION == stable"
+  - provider: packagecloud
+    username: lukaspustina
+    token:
+      secure: rkn1URi+xzRvqaGQA7ggOO6q8QVhWBpx1sdAsSYvZWRBKHT8rcMruUgkvklxfkRrSTEA9GESjeaphMlorKCxN4In8jxn3BqpDBeuJ5uIRiM7X9lyc8HczAzHmUs0jhjxqwidtu8YkgslkNWJ8iVULAB0yMgbNqBXj0Xx3jMZ7h8V86C/eqMlQ2+qsyIdojqJQA0yOqBfnOlJCJQro0oXbsPivR/uYEDRRqhdtSr4D1ry/g4qfajBxLbhBXjLigQwNHNz1umd8YG0aiK8NBqNFMQ0p4pwdfsT6VsgDk5gL2tAXJWtT8co8oJBaFwz+xSwrWnP8jrrv5chgSjM23FcYs6pHkefKxwNWvHMVuirs/o631NhAMJsVPG3ekzaNyN1fPMZzeCJwYAc9+MMGJE3AqpRyNrl+EIIBWG0E0wAT2RL/1U1dO8J0gnPMus5wmoWyY8LLtTHkHAkvyvjafXmih9lgvrJkObByE3tvTvDNHMzrWFVFBLaIdsCiJ/8Fm7rYFtBiP/UbHbQENLe2Uql3klH0PkPmsBADlkIkdFiS9UQfVe5BBX138P9p15xetT3qpVTAsDkz/nyV0gi9CrezUmJBkqKx93pVptv9O/NkBBUHd3pqr/eWmzAM2Xp0tcoXnZC4yGE8DNDEI8jvY5v8djcGsst2fOd0/VKIgS40aI=
+    repository: opensource
+    dist: ubuntu/trusty
+    package_glob: "**/*.deb"
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+      - "$TRAVIS_OS_NAME == linux"
+      - "$DEPLOY_ARCH"
+  - provider: releases
+    api_key:
+      secure: pRvyDo1vbnK6Q4N7CUJ8px3LjwQP8sIfZ+OJeyuHXiWATDoAHFq6OM3gteg4g01BV6b51fWsharcDb7aD6qmmzGOyf5JJLKRfkIpff196FDmNIDT39hWvBNPV/nPd58g7nsH4IK+PWNOq4FSP2Nn5BxYndIlRz76NNH2XJnUvJZzeI0/ouD1a45AVYnV12Ke2cmHktq/MXN1+uKq21PGfrRlmCUcgezdbJoV59h6qTq7U1zZkdfNbcrIROko2ZVkSgnWrA+Pu/+nDwSlQEKY7Te8XspWKxrDcTJ/quussEB8zN9IntLLktM3TgHTUUZdN+WNDB4rS2K1+tUVV58o6wJJ9jOIv8OMh21EHeH29dpkrYjcyYl5+MajxZa3GiarwdMAZrsRTD3pjjv1zGXK6PSym/CWzcWZUYOnytwwHH+E3XsieVjBSaenBXT4hJVzVfyiS0J+vN4R2YF3ZyFU2NPx16MBdb4vW6S7faQpnxScMRNavHhJanugTbmZgz2nFBA6uEDy/0mJFxAzWadWxA+J4PKogrcNJMAmygKYd5jVNuXDNi9JKKWSQRaWyHlOXQfCEovQY8Gm8rMAnsIuyyG9KMN/VViveaqys7KWnsGnpYViQi7mpGdYv9LVVuf5z0DWvqGR9tCHP0/++6x5FEYiPGqjubFz1pptB59WA9E=
+    file_glob: true
+    file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+    skip_cleanup: true
+    on:
+      tags: true
+      condition:
+      - "$TRAVIS_OS_NAME == linux"
+      - "$DEPLOY_ARCH"
+
 after_deploy:
 - cd /home/travis/build/lukaspustina/luftpost; cargo publish --token ${CRATES_IO_TOKEN}
-env:
-  global:
-    secure: DQqW6qUEtp5tWLjrgolxHmxRYzJsiK63n0hHl2as+YG54wYsiOurZVWdMnSs5QPJbhJ/UzdWCdi5a9MdBdVSiGjZB+3KNEhhmzSv/8Ed8a43cAgqzXPuyDNSNrbOcfxbo5QeFufPGc1Mv+HOpuYgeb6a+Cx6kad82nduP+MfY8dGi99IiapHgKpi/+Pfhf2jjYjIar9nzTHQfzDvshCCaDycaqMVuGrnQs4R0PgYOmBNyEqgzet0bpWu71osnc+lKZtlg01R12cwYxTmwaaNzBwO0058pv8gjuizLKgAmLqVJFOYQ1BAdPKC9CwvjplroJBvA4O0evI8y7nlVjNb5b8wzgaYaMvEeZL5DZQTYdNEgN5A+zbr4pifWekVom3Bsm8MkZPoH2cQpt+uxfgiA87U+ctdMWJOxBO4MHZVAN8SCEIq7P4n6bfOKbnQp3r0npCXFwQsSIc94gA7c+fvUSNyz5d94gBYtRg06UnUNsTn2tUWwv+4yCYqM++WuCBI0sQiwnXOqJqkcI5Grh6Vi0y33URjO66ZxNF6ymgiSyST9JSq/RteS1k30pLgRBDEvGsOdQ4+coDW240LqV6oMsb4t7P0rY45knK/ITSNs4zb0p5gPXJpm2iRd3dmbNev7tJ0y4kAleYE/TRCXLG6ijwyLDDKJEClekR980Bec+A=
+

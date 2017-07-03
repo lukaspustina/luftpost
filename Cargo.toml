@@ -16,8 +16,8 @@ include = [
 ]
 
 [badges]
-travis-ci = { repository = "lukaspustina/luftdaten", branch = "master" }
-appveyor = { repository = "lukaspustina/luftdaten", branch = "master" }
+travis-ci = { repository = "lukaspustina/luftpost", branch = "master" }
+appveyor = { repository = "lukaspustina/luftpost", branch = "master" }
 
 [[bin]]
 name = "luftpost"
