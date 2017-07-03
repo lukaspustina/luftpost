@@ -9,7 +9,7 @@ extern crate tokio_core;
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
 use luftpost::{Config, Mailer, Measurement, Sensor};
-use luftpost::config::EmailCondition;
+use luftpost::config::NotificationCondition;
 use std::io;
 use std::path::Path;
 use tokio_core::reactor::Core;
@@ -80,8 +80,8 @@ fn run() -> Result<i32> {
         let results = checked_measurements
             .iter()
             .filter(|cm|
-                match cm.measurement.sensor.e_mail_condition.unwrap() {
-                    EmailCondition::Always | EmailCondition::ThresholdExceeded if !cm.violations.is_empty() => true,
+                match cm.measurement.sensor.notification_condition.unwrap() {
+                    NotificationCondition::Always | NotificationCondition::ThresholdExceeded if !cm.violations.is_empty() => true,
                     _ => false
                 }
             )

@@ -29,7 +29,9 @@ pub enum Transport {
 
 pub struct Mailer<'a> {
     pub transport: Transport,
+    pub to_addr: &'a str,
     pub from_addr: &'a str,
+    pub subject: &'a str,
     pub text_template: &'a str,
     pub html_template: &'a str,
 }
@@ -51,7 +53,9 @@ impl<'a> Mailer<'a> {
 
         let mailer = Mailer {
             transport: Transport::Smtp(transport),
+            to_addr: &smtp.receiver,
             from_addr: &smtp.sender,
+            subject: &smtp.subject,
             text_template: &smtp.text_template,
             html_template: &smtp.html_template,
         };
@@ -60,10 +64,10 @@ impl<'a> Mailer<'a> {
     }
 
     pub fn mail_measurement(&mut self, measurement: &Measurement) -> Result<()> {
-        let (subject, text, html) = create_body(measurement, &measurement.sensor.e_mail_subject.as_ref().unwrap(),
+        let (subject, text, html) = create_body(measurement, self.subject,
                                                 self.text_template, self.html_template)?;
         let email = EmailBuilder::new()
-            .to(&measurement.sensor.e_mail_addr.as_ref().unwrap()[..])
+            .to(self.to_addr)
             .from(self.from_addr)
             .subject(&subject)
             .alternative(&html, &text)
@@ -117,9 +121,7 @@ mod test {
             data_uri: "http://localhost".to_string(),
             threshold_pm10: Some(10.0),
             threshold_pm2: Some(2.0),
-            e_mail_addr: Some("test@example.com".to_string()),
-            e_mail_subject: Some("PM Alarm".to_string()),
-            e_mail_condition: None,
+            notification_condition: None,
         };
         let mut data_values = Vec::new();
         data_values.push(Value::SDS_P1(7.87f32));
@@ -137,7 +139,9 @@ mod test {
         };
         let mut mailer = Mailer {
             transport: Transport::Stub(StubEmailTransport),
+            to_addr: "test@example.com",
             from_addr: "sender@example.com",
+            subject: "Sensor {{ sensor.name }} exceeded thresholds",
             text_template: "{{ sensor.name }}",
             html_template: "{{ sensor.name }}"
         };

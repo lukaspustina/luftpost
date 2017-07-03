@@ -37,9 +37,7 @@ mod test {
             data_uri: "http://localhost".to_string(),
             threshold_pm10: Some(10.0),
             threshold_pm2: Some(2.0),
-            e_mail_addr: None,
-            e_mail_subject: None,
-            e_mail_condition: None,
+            notification_condition: None,
         };
         let mut data_values = Vec::new();
         data_values.push(Value::SDS_P1(17.87f32));

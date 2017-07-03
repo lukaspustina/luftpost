@@ -29,9 +29,7 @@ pub struct Sensor {
     pub data_uri: String,
     pub threshold_pm10: Option<f32>,
     pub threshold_pm2: Option<f32>,
-    pub e_mail_addr: Option<String>,
-    pub e_mail_subject: Option<String>,
-    pub e_mail_condition: Option<config::EmailCondition>,
+    pub notification_condition: Option<config::NotificationCondition>,
 }
 
 impl Sensor {
@@ -43,9 +41,7 @@ impl Sensor {
             data_uri: data_uri.into(),
             threshold_pm10: None,
             threshold_pm2: None,
-            e_mail_addr: None,
-            e_mail_subject: None,
-            e_mail_condition: None,
+            notification_condition: None,
         }
     }
 

@@ -21,7 +21,7 @@ error_chain! {
 #[serde(tag = "condition")]
 #[derive(PartialOrd, PartialEq, Eq)]
 #[derive(Clone, Copy)]
-pub enum EmailCondition {
+pub enum NotificationCondition {
     Always,
     ThresholdExceeded,
 }
@@ -30,14 +30,14 @@ pub enum EmailCondition {
 pub struct Defaults {
     pub threshold_pm10: Option<f32>,
     pub threshold_pm2: Option<f32>,
-    pub e_mail_addr: Option<String>,
-    pub e_mail_subject: Option<String>,
-    pub e_mail_condition: Option<EmailCondition>,
+    pub notification_condition: Option<NotificationCondition>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Smtp {
     pub sender: String,
+    pub receiver: String,
+    pub subject: String,
     pub server: String,
     pub port: Option<u16>,
     pub username: Option<String>,
@@ -118,9 +118,7 @@ impl Config {
     fn set_defaults(config: Config) -> Config {
         let threshold_pm10 = config.defaults.threshold_pm10.or(Some(50.0));
         let threshold_pm2 = config.defaults.threshold_pm2.or(Some(50.0));
-        let e_mail_addr = config.defaults.e_mail_addr;
-        let e_mail_subject = config.defaults.e_mail_subject;
-        let e_mail_condition = config.defaults.e_mail_condition.or(Some(EmailCondition::ThresholdExceeded));
+        let e_mail_condition = config.defaults.notification_condition.or(Some(NotificationCondition::ThresholdExceeded));
 
         let sensors = config
             .sensors
@@ -128,15 +126,11 @@ impl Config {
             .map(|s| {
                 let s_threshold_pm10 = s.threshold_pm10.or(threshold_pm10);
                 let s_threshold_pm2 = s.threshold_pm2.or(threshold_pm2);
-                let s_e_mail_addr = s.e_mail_addr.or_else(|| e_mail_addr.clone());
-                let s_e_mail_subject = s.e_mail_subject.or_else(|| e_mail_subject.clone());
-                let s_e_mail_condition = s.e_mail_condition.or_else(|| e_mail_condition.clone());
+                let s_notification_condition = s.notification_condition.or_else(|| e_mail_condition.clone());
                 Sensor {
                     threshold_pm10: s_threshold_pm10,
                     threshold_pm2: s_threshold_pm2,
-                    e_mail_addr: s_e_mail_addr,
-                    e_mail_subject: s_e_mail_subject,
-                    e_mail_condition: s_e_mail_condition,
+                    notification_condition: s_notification_condition,
                     ..s
                 }
             })
@@ -145,9 +139,7 @@ impl Config {
         let defaults = Defaults {
             threshold_pm10: threshold_pm10,
             threshold_pm2: threshold_pm2,
-            e_mail_addr: e_mail_addr,
-            e_mail_subject: e_mail_subject,
-            e_mail_condition: e_mail_condition,
+            notification_condition: e_mail_condition,
         };
         Config {
             defaults: defaults,
@@ -182,13 +174,13 @@ data_uri = "http://feinstaub/data.json"
         let config_str = r#"[defaults]
 threshold_pm10 = 10.0
 threshold_pm2 = 10.0
-e_mail_addr = "test@example.com"
-e_mail_subject = "PM alarm"
-[defaults.e_mail_condition]
+[defaults.notification_condition]
 condition = 'Always'
 
 [smtp]
 sender = "test@example.com"
+subject = "PM alarm from sensor {{ sensor.name }}"
+receiver = "test@example.com"
 server = "localhost"
 port = 25
 username = "test"
@@ -216,7 +208,7 @@ threshold_pm10 = 20.0
 threshold_pm2 = 20.0
 e_mail_addr = "another_test@example.com"
 e_mail_subject = "Feinstaubalarm"
-[sensors.e_mail_condition]
+[sensors.notification_condition]
 condition = 'ThresholdExceeded'
 "#;
 
@@ -224,15 +216,12 @@ condition = 'ThresholdExceeded'
 
         assert_eq!(config.defaults.threshold_pm10.unwrap(), 10.0);
         assert_eq!(config.defaults.threshold_pm2.unwrap(), 10.0);
-        assert_eq!(
-            config.defaults.e_mail_addr.as_ref().unwrap(),
-            "test@example.com"
-        );
-        assert_eq!(config.defaults.e_mail_subject.as_ref().unwrap(), "PM alarm");
-        assert_eq!(config.defaults.e_mail_condition.unwrap(), EmailCondition::Always);
+        assert_eq!(config.defaults.notification_condition.unwrap(), NotificationCondition::Always);
 
         assert!(config.smtp.is_some());
         let smtp = config.smtp.unwrap();
+        assert_eq!( &smtp.receiver, "test@example.com" );
+        assert!(smtp.subject.contains("{{ sensor.name }}"));
         assert_eq!(&smtp.sender, "test@example.com");
         assert_eq!(&smtp.server, "localhost");
         assert_eq!(smtp.port.unwrap(), 25);
@@ -249,16 +238,12 @@ condition = 'ThresholdExceeded'
         let s1 = &config.sensors[0];
         assert_eq!(s1.threshold_pm10.unwrap(), 10.0);
         assert_eq!(s1.threshold_pm2.unwrap(), 10.0);
-        assert_eq!(s1.e_mail_addr.as_ref().unwrap(), "test@example.com");
-        assert_eq!(s1.e_mail_subject.as_ref().unwrap(), "PM alarm");
-        assert_eq!(s1.e_mail_condition.unwrap(), EmailCondition::Always);
+        assert_eq!(s1.notification_condition.unwrap(), NotificationCondition::Always);
 
         let s2 = &config.sensors[1];
         assert_eq!(s2.threshold_pm10.unwrap(), 20.0);
         assert_eq!(s2.threshold_pm2.unwrap(), 20.0);
-        assert_eq!(s2.e_mail_addr.as_ref().unwrap(), "another_test@example.com");
-        assert_eq!(s2.e_mail_subject.as_ref().unwrap(), "Feinstaubalarm");
-        assert_eq!(s2.e_mail_condition.unwrap(), EmailCondition::ThresholdExceeded);
+        assert_eq!(s2.notification_condition.unwrap(), NotificationCondition::ThresholdExceeded);
     }
 
     #[test]
