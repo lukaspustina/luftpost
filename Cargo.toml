@@ -1,6 +1,6 @@
 [package]
 name = "luftpost"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Lukas Pustina <lukas@pustina.net>"]
 
 description = "Watches luftdaten.info particulates sensors and sends E-Mails if measurements exceed thresholds"

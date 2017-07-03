@@ -1,30 +1,83 @@
 ---
 version: build-{build}
 environment:
+  global:
+    CRATE_NAME: luftpost
+    RUST_VERSION: stable
   matrix:
-  - TARGET: x86_64-pc-windows-gnu
-    BITS: 64
-    MSYS2: 1
+  # MinGW
   - TARGET: i686-pc-windows-gnu
     BITS: 32
-    MSYS2: 1
+  - TARGET: x86_64-pc-windows-gnu
+    BITS: 64
+
+  # MSVC
+  - TARGET: i686-pc-windows-msvc
+    BITS: 32
+  - TARGET: x86_64-pc-windows-msvc
+    BITS: 64
+
+  # Test future Rust versions
+  - TARGET: x86_64-pc-windows-gnu
+    BITS: 64
+    RUST_VERSION: beta
+  - TARGET: x86_64-pc-windows-gnu
+    BITS: 64
+    RUST_VERSION: nightly
+
 install:
-    # install OpenSSL
+    # Install OpenSSL
   - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-1_1_0f.exe"
   - Win%BITS%OpenSSL-1_1_0f.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
   - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
 
-  # Install Rust
+    # Install Rust
+  - ps: >-
+      If ($Env:TARGET -eq 'x86_64-pc-windows-gnu') {
+        $Env:PATH += ';C:\msys64\mingw64\bin'
+      } ElseIf ($Env:TARGET -eq 'i686-pc-windows-gnu') {
+        $Env:PATH += ';C:\msys64\mingw32\bin'
+      }
   - curl -sSf -o rustup-init.exe https://win.rustup.rs/
-  - rustup-init.exe -y --default-host %TARGET%
+  - rustup-init.exe -y --default-host %TARGET% --default-toolchain %RUST_VERSION%
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
-  - if defined MSYS2 set PATH=C:\msys64\mingw%BITS%\bin;%PATH%
   - rustc -V
   - cargo -V
-build: off
+
 test_script:
-  # Compile, run test, check if the binary works, build release binaries
-  - cargo test
-  - cargo run -- --help
-  - cargo build --release
+  - if [%APPVEYOR_REPO_TAG%]==[false] (
+      cargo build --target %TARGET% --release &&
+      cargo test  --target %TARGET% --release &&
+      cargo run   --target %TARGET% --release -- --help
+    )
+
+before_deploy:
+  - cargo rustc --target %TARGET% --release --bin luftpost -- -C lto
+  - ps: .ci\before_deploy.ps1
+
+deploy:
+  provider: GitHub
+  artifact: /.*\.zip/
+  auth_token:
+    secure: z7QkKLAgXXrOOC2pLGmlXya6IVGPcMVJ5q/RLwifFRFFKbaCQlSkjwORqADBJz/T
+  description: ''
+  on:
+    RUST_VERSION: stable
+    appveyor_repo_tag: true
+
+cache:
+  - C:\Users\appveyor\.cargo\registry
+  - target
+
+branches:
+  only:
+    - /^v\d+\.\d+\.\d+.*$/
+    - appveyor
+    - master
+
+notifications:
+  - provider: Email
+    on_build_success: true
+
+build: false
 
