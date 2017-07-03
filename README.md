@@ -44,23 +44,23 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
         * [X] Add public sensor ID and add graphs to HTML body
 
-* [ ] Infrastructure
+* [X] Infrastructure
 
     * [X] Travis CI, appveyor
 
     * [ ] Travis: Cross compile for ARM
 
-    * [ ] Travis: Build Debian packages (x86, ARM)
+    * [X] Travis: Build Debian packages (x86, ARM)
 
-    * [ ] Travis, Appveyor: Push binaries to GitHub realses
+    * [X] Travis, Appveyor: Push binaries to GitHub realses
 
 * [ ] Milestone 0.1
 
-    * [ ] Readme
+    * [X] brew recipe
 
     * [ ] Ansible Role
 
-    * [ ] brew recipe
+    * [ ] Readme
 
 * [ ] Milestone 0.2
 
