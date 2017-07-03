@@ -87,6 +87,7 @@ impl<'a> Mailer<'a> {
 fn create_body(measurement: &Measurement, subject_template: &str, text_template: &str, html_template: &str) -> Result<(String, String, String)> {
     let mut handlebars = Handlebars::new();
     handlebars.register_helper("number", Box::new(handlebars_number_formatter));
+    handlebars.register_helper("exceeds", Box::new(handlebars_number_comparision));
     let subject = handlebars.template_render(subject_template, measurement)?;
     let text = handlebars.template_render(text_template, measurement)?;
     let html = handlebars.template_render(html_template, measurement)?;
@@ -99,6 +100,24 @@ fn handlebars_number_formatter(h: &Helper, _: &Handlebars, rc: &mut RenderContex
     let number = param.value().as_f64().unwrap();
 
     let f = format!("{:.2}", number);
+    rc.writer.write(f.as_bytes())?;
+
+    Ok(())
+}
+
+fn handlebars_number_comparision(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> ::std::result::Result<(), RenderError> {
+    let param1 = h.param(0).unwrap();
+    let param2 = h.param(1).unwrap();
+    let number1 = param1.value().as_f64().unwrap();
+    let number2 = param2.value().as_f64().unwrap();
+
+    let f = if number1 > number2 {
+        ">"
+    } else if number1 < number2 {
+        "<"
+    } else {
+        "="
+    };
     rc.writer.write(f.as_bytes())?;
 
     Ok(())
