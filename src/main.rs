@@ -75,7 +75,9 @@ fn run() -> Result<i32> {
     }
 
     if let Some(ref smtp) = config.smtp {
-        println!("Sending E-Mails:");
+        if print {
+            println!("Sending E-Mails:");
+        }
         let mut mailer = Mailer::create_mailer(smtp)?;
         let results = checked_measurements
             .iter()
