@@ -51,6 +51,10 @@ fn run() -> Result<i32> {
     if cli_args.is_present("show-config") {
         println!("Config: {:?}", &config);
     }
+    if cli_args.is_present("check-config") {
+        println!("Configuration is ok");
+        return Ok(0);
+    }
     let print = cli_args.is_present("print");
 
     let mut core = Core::new()?;
@@ -105,6 +109,9 @@ fn build_cli() -> App<'static, 'static> {
         .arg(Arg::with_name("print")
              .long("print")
              .help("Print results"))
+        .arg(Arg::with_name("check-config")
+             .long("check-config")
+             .help("Checks config and exits"))
         .arg(Arg::with_name("show-config")
              .long("show-config")
              .help("Prints config"))
