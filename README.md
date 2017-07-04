@@ -56,22 +56,24 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Travis, Appveyor: Push binaries to GitHub realses
 
-* [ ] Milestone 0.1
+* [-] Milestone 1
 
-    * [-] brew recipe
+    * [X] brew recipe
 
-    * [-] Ansible Role
+    * [X] Ansible Role
 
-    * [ ] Readme
-
-* [ ] Milestone 0.2
-
-    * [ ] Send E-Mails
-
-        * [ ] Move to Futures
+* [ ] Milestone 2
 
     * [ ] Show full error stack
 
+[ ] Release 0.1
+
+   * [ ] Readme
+
+
+## Future Work
+
     * [ ] Progress bar for terminal operation
 
+    * [ ] Send E-Mails: Move to Futures
 
