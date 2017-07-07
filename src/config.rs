@@ -126,7 +126,7 @@ impl Config {
             .map(|s| {
                 let s_threshold_pm10 = s.threshold_pm10.or(threshold_pm10);
                 let s_threshold_pm2 = s.threshold_pm2.or(threshold_pm2);
-                let s_notification_condition = s.notification_condition.or_else(|| e_mail_condition.clone());
+                let s_notification_condition = s.notification_condition.or_else(|| e_mail_condition);
                 Sensor {
                     threshold_pm10: s_threshold_pm10,
                     threshold_pm2: s_threshold_pm2,

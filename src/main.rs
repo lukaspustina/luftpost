@@ -66,7 +66,7 @@ fn run() -> Result<i32> {
     }
     let checked_measurements = measurements
         .into_iter()
-        .map(|m| luftpost::check_measurement(m))
+        .map(luftpost::check_measurement)
         .collect::<Vec<_>>();
     if print {
         println!("Measurements exceeding thresholds:");

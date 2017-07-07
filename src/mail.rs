@@ -8,6 +8,7 @@ use lettre::transport::smtp::SUBMISSION_PORT;
 use lettre::transport::stub::StubEmailTransport;
 use lettre::transport::file::FileEmailTransport;
 
+#[allow(large_enum_variant)]
 error_chain!{
     errors {
     }
@@ -22,9 +23,9 @@ error_chain!{
 }
 
 pub enum Transport {
-    File(FileEmailTransport),
-    Smtp(SmtpTransport),
-    Stub(StubEmailTransport)
+    File(Box<FileEmailTransport>),
+    Smtp(Box<SmtpTransport>),
+    Stub(Box<StubEmailTransport>)
 }
 
 pub struct Mailer<'a> {
@@ -52,7 +53,7 @@ impl<'a> Mailer<'a> {
         let transport = builder.build();
 
         let mailer = Mailer {
-            transport: Transport::Smtp(transport),
+            transport: Transport::Smtp(Box::new(transport)),
             to_addr: &smtp.receiver,
             from_addr: &smtp.sender,
             subject: &smtp.subject,
@@ -100,7 +101,7 @@ fn handlebars_number_formatter(h: &Helper, _: &Handlebars, rc: &mut RenderContex
     let number = param.value().as_f64().unwrap();
 
     let f = format!("{:.2}", number);
-    rc.writer.write(f.as_bytes())?;
+    rc.writer.write_all(f.as_bytes())?;
 
     Ok(())
 }
@@ -118,7 +119,7 @@ fn handlebars_number_comparision(h: &Helper, _: &Handlebars, rc: &mut RenderCont
     } else {
         "="
     };
-    rc.writer.write(f.as_bytes())?;
+    rc.writer.write_all(f.as_bytes())?;
 
     Ok(())
 }
@@ -157,7 +158,7 @@ mod test {
             data_values: data_values,
         };
         let mut mailer = Mailer {
-            transport: Transport::Stub(StubEmailTransport),
+            transport: Transport::Stub(Box::new(StubEmailTransport)),
             to_addr: "test@example.com",
             from_addr: "sender@example.com",
             subject: "Sensor {{ sensor.name }} exceeded thresholds",
