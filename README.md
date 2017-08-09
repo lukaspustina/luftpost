@@ -50,13 +50,13 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Travis CI, appveyor
 
-    * [ ] Travis: Cross compile for ARM
+    * [X] Travis: Cross compile for ARM
 
     * [X] Travis: Build Debian packages (x86, ARM)
 
     * [X] Travis, Appveyor: Push binaries to GitHub realses
 
-* [-] Milestone 1
+* [X] Milestone 1
 
     * [X] brew recipe
 
@@ -65,6 +65,10 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 * [ ] Milestone 2
 
     * [ ] Show full error stack
+
+* [ ] Milestone 3
+
+    * [ ] Alert on changes only
 
 [ ] Release 0.1
 
