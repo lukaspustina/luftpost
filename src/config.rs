@@ -17,6 +17,11 @@ error_chain! {
 	}
 }
 
+#[derive(Debug, Deserialize)]
+pub struct General {
+    pub state_dir: Option<String>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "condition")]
 #[derive(PartialOrd, PartialEq, Eq)]
@@ -31,7 +36,6 @@ pub enum NotificationCondition {
 pub struct Defaults {
     pub threshold_pm10: Option<f32>,
     pub threshold_pm2: Option<f32>,
-    pub state_dir: Option<String>,
     pub notification_condition: Option<NotificationCondition>,
 }
 
@@ -89,6 +93,7 @@ fn default_template() -> String {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub general: General,
     pub defaults: Defaults,
     pub smtp: Option<Smtp>,
     pub sensors: Vec<Sensor>,
@@ -121,7 +126,6 @@ impl Config {
         let threshold_pm10 = config.defaults.threshold_pm10.or(Some(50.0));
         let threshold_pm2 = config.defaults.threshold_pm2.or(Some(50.0));
         let e_mail_condition = config.defaults.notification_condition.or(Some(NotificationCondition::ThresholdExceeded));
-        let state_dir = config.defaults.state_dir;
 
         let sensors = config
             .sensors
@@ -142,7 +146,6 @@ impl Config {
         let defaults = Defaults {
             threshold_pm10: threshold_pm10,
             threshold_pm2: threshold_pm2,
-            state_dir: state_dir,
             notification_condition: e_mail_condition,
         };
         Config {
@@ -159,7 +162,9 @@ mod test {
 
     #[test]
     pub fn config_from_min_str_okay() -> () {
-        let config_str = r#"[defaults]
+        let config_str = r#"[general]
+
+[defaults]
 
 [[sensors]]
 name = "Feinstaub"
@@ -175,10 +180,12 @@ data_uri = "http://feinstaub/data.json"
 
     #[test]
     pub fn config_from_max_str_okay() -> () {
-        let config_str = r#"[defaults]
+        let config_str = r#"[general]
+state_dir = '/var/lib/luftpost'
+
+[defaults]
 threshold_pm10 = 10.0
 threshold_pm2 = 10.0
-state_dir = '/var/lib/luftpost'
 [defaults.notification_condition]
 condition = 'OnChange'
 
@@ -219,9 +226,10 @@ condition = 'ThresholdExceeded'
 
         let config = Config::parse_toml(config_str).unwrap();
 
+        assert_eq!(config.general.state_dir.unwrap(), "/var/lib/luftpost");
+
         assert_eq!(config.defaults.threshold_pm10.unwrap(), 10.0);
         assert_eq!(config.defaults.threshold_pm2.unwrap(), 10.0);
-        assert_eq!(config.defaults.state_dir.unwrap(), "/var/lib/luftpost");
         assert_eq!(config.defaults.notification_condition.unwrap(), NotificationCondition::OnChange);
 
         assert!(config.smtp.is_some());

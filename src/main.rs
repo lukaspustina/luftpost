@@ -59,7 +59,7 @@ fn run() -> Result<i32> {
     }
     let print = cli_args.is_present("print");
 
-    let sensor_states = if let Some(ref state_dir) = config.defaults.state_dir {
+    let sensor_states = if let Some(ref state_dir) = config.general.state_dir {
         load_sensor_states(&config.sensors, state_dir).ok()
     } else {
         None
@@ -82,7 +82,7 @@ fn run() -> Result<i32> {
         luftpost::print_measurements(violations.as_slice())
     }
 
-    if let Some(ref state_dir) = config.defaults.state_dir {
+    if let Some(ref state_dir) = config.general.state_dir {
         save_sensor_states(&checked_measurements, state_dir)?;
     }
 
