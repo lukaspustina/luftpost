@@ -18,14 +18,18 @@ pub mod mail;
 pub mod measurement;
 pub mod output;
 pub mod sensor;
+pub mod state;
 
-pub use check::check_measurement;
+pub use check::{CheckedMeasurement, check_measurement};
 pub use config::Config;
 pub use mail::Mailer;
 pub use measurement::Measurement;
-pub use sensor::{Sensor, create_sensor_reader};
 pub use output::print_measurements;
+pub use sensor::{Sensor, SensorId, create_sensor_reader};
+pub use state::{AlarmState, SensorState};
 
 #[cfg(test)]
 #[macro_use]
 extern crate pretty_assertions;
+#[cfg(test)]
+extern crate mktemp;

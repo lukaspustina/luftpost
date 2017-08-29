@@ -30,7 +30,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
         * [X] Default threshold
 
-        * [X] E-Mail: receipient, subjects
+        * [X] E-Mail: recipient, subjects
 
         * [X] E-Mail Options: exceed, no-data, okay
 
@@ -54,7 +54,7 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Travis: Build Debian packages (x86, ARM)
 
-    * [X] Travis, Appveyor: Push binaries to GitHub realses
+    * [X] Travis, Appveyor: Push binaries to GitHub releases
 
 * [X] Milestone 1
 
@@ -62,13 +62,13 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Ansible Role
 
-* [ ] Milestone 2
+* [X] Milestone 2
 
-    * [ ] Show full error stack
+    * [X] Alert on changes only
 
 * [ ] Milestone 3
 
-    * [ ] Alert on changes only
+    * [ ] Show full error stack
 
 [ ] Release 0.1
 
@@ -76,8 +76,6 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
 
 ## Future Work
-
-    * [ ] Progress bar for terminal operation
 
     * [ ] Send E-Mails: Move to Futures
 

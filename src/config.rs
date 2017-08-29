@@ -1,4 +1,4 @@
-use sensor::Sensor;
+use sensor::{ Sensor};
 
 use lettre::transport::smtp::authentication;
 use serde::de::{self, Deserializer, Visitor};
@@ -23,6 +23,7 @@ error_chain! {
 #[derive(Clone, Copy)]
 pub enum NotificationCondition {
     Always,
+    OnChange,
     ThresholdExceeded,
 }
 
@@ -30,6 +31,7 @@ pub enum NotificationCondition {
 pub struct Defaults {
     pub threshold_pm10: Option<f32>,
     pub threshold_pm2: Option<f32>,
+    pub state_dir: Option<String>,
     pub notification_condition: Option<NotificationCondition>,
 }
 
@@ -119,6 +121,7 @@ impl Config {
         let threshold_pm10 = config.defaults.threshold_pm10.or(Some(50.0));
         let threshold_pm2 = config.defaults.threshold_pm2.or(Some(50.0));
         let e_mail_condition = config.defaults.notification_condition.or(Some(NotificationCondition::ThresholdExceeded));
+        let state_dir = config.defaults.state_dir;
 
         let sensors = config
             .sensors
@@ -139,6 +142,7 @@ impl Config {
         let defaults = Defaults {
             threshold_pm10: threshold_pm10,
             threshold_pm2: threshold_pm2,
+            state_dir: state_dir,
             notification_condition: e_mail_condition,
         };
         Config {
@@ -174,8 +178,9 @@ data_uri = "http://feinstaub/data.json"
         let config_str = r#"[defaults]
 threshold_pm10 = 10.0
 threshold_pm2 = 10.0
+state_dir = '/var/lib/luftpost'
 [defaults.notification_condition]
-condition = 'Always'
+condition = 'OnChange'
 
 [smtp]
 sender = "test@example.com"
@@ -216,7 +221,8 @@ condition = 'ThresholdExceeded'
 
         assert_eq!(config.defaults.threshold_pm10.unwrap(), 10.0);
         assert_eq!(config.defaults.threshold_pm2.unwrap(), 10.0);
-        assert_eq!(config.defaults.notification_condition.unwrap(), NotificationCondition::Always);
+        assert_eq!(config.defaults.state_dir.unwrap(), "/var/lib/luftpost");
+        assert_eq!(config.defaults.notification_condition.unwrap(), NotificationCondition::OnChange);
 
         assert!(config.smtp.is_some());
         let smtp = config.smtp.unwrap();
@@ -238,7 +244,7 @@ condition = 'ThresholdExceeded'
         let s1 = &config.sensors[0];
         assert_eq!(s1.threshold_pm10.unwrap(), 10.0);
         assert_eq!(s1.threshold_pm2.unwrap(), 10.0);
-        assert_eq!(s1.notification_condition.unwrap(), NotificationCondition::Always);
+        assert_eq!(s1.notification_condition.unwrap(), NotificationCondition::OnChange);
 
         let s2 = &config.sensors[1];
         assert_eq!(s2.threshold_pm10.unwrap(), 20.0);

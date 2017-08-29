@@ -1,6 +1,6 @@
 [package]
 name = "luftpost"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Lukas Pustina <lukas@pustina.net>"]
 
 description = "Watches luftdaten.info particulates sensors and sends E-Mails if measurements exceed thresholds"
@@ -38,4 +38,5 @@ tokio-core = "0.1"
 toml = "0.4"
 
 [dev-dependencies]
+mktemp = "0.3"
 pretty_assertions = "0.1"

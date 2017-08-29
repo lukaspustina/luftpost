@@ -17,14 +17,17 @@ error_chain! {
         Fmt(::std::str::Utf8Error);
         Io(::std::io::Error);
         Hyper(::hyper::Error);
+		CouldNotParse(::serde_json::Error);
     }
 }
+
+pub type SensorId = String;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[derive(PartialEq)]
 pub struct Sensor {
     pub name: String,
-    pub id: String,
+    pub id: SensorId,
     pub ui_uri: String,
     pub data_uri: String,
     pub threshold_pm10: Option<f32>,
@@ -59,6 +62,7 @@ impl Sensor {
             .and_then(|x| x);
         Box::new(m)
     }
+
 }
 
 pub fn create_sensor_reader(core: &mut Core) -> Client<HttpConnector> {

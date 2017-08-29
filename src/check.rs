@@ -1,17 +1,19 @@
 use measurement::{Measurement, Value};
 
+#[derive(Debug, Serialize)]
 pub struct CheckedMeasurement {
     pub measurement: Measurement,
+    pub has_violations: bool,
     pub violations: Vec<Value>,
 }
 
 pub fn check_measurement(measurement: Measurement) -> CheckedMeasurement {
-    let violations = measurement
+    let violations: Vec<_> = measurement
         .data_values
         .clone()
         .into_iter()
         .map(|value| match value {
-            // Unwraps are save because they are sent during config parsing
+            // Unwraps are safe because they are checked during config parsing
             Value::SDS_P1(v) if v > measurement.sensor.threshold_pm10.unwrap() => Some(value),
             Value::SDS_P2(v) if v > measurement.sensor.threshold_pm2.unwrap() => Some(value),
             _ => None,
@@ -19,7 +21,7 @@ pub fn check_measurement(measurement: Measurement) -> CheckedMeasurement {
         .flat_map(|v| v)
         .collect();
 
-    CheckedMeasurement { measurement: measurement, violations: violations }
+    CheckedMeasurement { measurement: measurement, has_violations: !violations.is_empty(), violations: violations }
 }
 
 #[cfg(test)]
@@ -51,6 +53,7 @@ mod test {
         let res = check_measurement(measurement);
 
         assert_eq!(res.violations.len(), 2);
+        assert!(res.has_violations);
 
     }
 }

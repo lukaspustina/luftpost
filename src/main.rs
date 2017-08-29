@@ -8,8 +8,9 @@ extern crate tokio_core;
 
 use clap::{Arg, App, Shell};
 use futures::future::join_all;
-use luftpost::{Config, Mailer, Measurement, Sensor};
+use luftpost::{AlarmState, CheckedMeasurement, Config, Mailer, Measurement, Sensor, SensorId, SensorState};
 use luftpost::config::NotificationCondition;
+use std::collections::HashMap;
 use std::io;
 use std::path::Path;
 use tokio_core::reactor::Core;
@@ -24,6 +25,7 @@ error_chain! {
         ConfigError(luftpost::config::Error, luftpost::config::ErrorKind);
         ReadingMeasurementFailed(luftpost::sensor::Error, luftpost::sensor::ErrorKind);
         EmailError(luftpost::mail::Error, luftpost::mail::ErrorKind);
+        StateError(luftpost::state::Error, luftpost::state::ErrorKind);
     }
     foreign_links {
         IoError(std::io::Error);
@@ -57,6 +59,12 @@ fn run() -> Result<i32> {
     }
     let print = cli_args.is_present("print");
 
+    let sensor_states = if let Some(ref state_dir) = config.defaults.state_dir {
+        load_sensor_states(&config.sensors, state_dir).ok()
+    } else {
+        None
+    };
+
     let mut core = Core::new()?;
 
     let measurements = read_measurements(&mut core, config.sensors)?;
@@ -70,8 +78,12 @@ fn run() -> Result<i32> {
         .collect::<Vec<_>>();
     if print {
         println!("Measurements exceeding thresholds:");
-        let violations = checked_measurements.iter().filter(|m| !m.violations.is_empty()).map(|cm| &cm.measurement).collect::<Vec<_>>();
+        let violations = checked_measurements.iter().filter(|cm| cm.has_violations).map(|cm| &cm.measurement).collect::<Vec<_>>();
         luftpost::print_measurements(violations.as_slice())
+    }
+
+    if let Some(ref state_dir) = config.defaults.state_dir {
+        save_sensor_states(&checked_measurements, state_dir)?;
     }
 
     if let Some(ref smtp) = config.smtp {
@@ -83,18 +95,42 @@ fn run() -> Result<i32> {
             .iter()
             .filter(|cm|
                 match cm.measurement.sensor.notification_condition.unwrap() {
-                    NotificationCondition::Always | NotificationCondition::ThresholdExceeded if !cm.violations.is_empty() => true,
+                    NotificationCondition::Always | NotificationCondition::ThresholdExceeded if cm.has_violations => true,
+                    NotificationCondition::OnChange if alarm_state_changed(
+                        sensor_states.as_ref(), &cm.measurement.sensor.id, cm.has_violations) => true,
                     _ => false
                 }
             )
             .map(|cm| {
-                println!("{}", cm.measurement.sensor.name);
-                mailer.mail_measurement(&cm.measurement).map_err(|e| e.into())
+                if print {
+                    if cm.has_violations {
+                        println!("{} because a threshold has been exceeded.", cm.measurement.sensor.name);
+                    } else {
+                        println!("{} because a threshold is back to normal.", cm.measurement.sensor.name);
+                    }
+                }
+                mailer.mail_measurement(&cm).map_err(|e| e.into())
             });
         results.collect::<::std::result::Result<Vec<()>, Error>>()?;
     }
 
     Ok(0)
+}
+
+fn alarm_state_changed(sensor_states: Option<&HashMap<SensorId, SensorState>>, sensor_id: &SensorId, has_violation: bool) -> bool {
+    if let Some(states) = sensor_states {
+        if let Some(state) = states.get(sensor_id) {
+            match state.alarm_state {
+                AlarmState::Normal if has_violation => true,
+                AlarmState::ThresholdExceeded if !has_violation => true,
+                _ => false
+            }
+        } else {
+            true
+        }
+    } else {
+        true
+    }
 }
 
 fn build_cli() -> App<'static, 'static> {
@@ -125,6 +161,18 @@ fn build_cli() -> App<'static, 'static> {
              .help("The shell to generate the script for"))
 }
 
+fn load_sensor_states<P: AsRef<Path>>(sensors: &Vec<Sensor>, state_dir: P) -> Result<HashMap<SensorId, SensorState>> {
+    let mut sensor_states = HashMap::new();
+
+    for s in sensors {
+        let state = SensorState::load(&s.id, &state_dir)?;
+        sensor_states.insert(s.id.clone(), state);
+    }
+
+    Ok(sensor_states)
+
+}
+
 fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measurement>> {
     let client = luftpost::create_sensor_reader(core);
     let work = sensors.into_iter().map(|s| {
@@ -135,4 +183,17 @@ fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measur
 
     let big_f = join_all(work);
     core.run(big_f).map_err(|e| e.into())
+}
+
+fn save_sensor_states<P: AsRef<Path>>(checked_measurements: &Vec<CheckedMeasurement>, state_dir: P) -> Result<()> {
+    for cm in checked_measurements {
+        let state = match cm.has_violations {
+            true => AlarmState::ThresholdExceeded,
+            false => AlarmState::Normal,
+        };
+        let sensor_state = SensorState { sensor_id: cm.measurement.sensor.id.clone(), alarm_state: state };
+        sensor_state.save(&state_dir)?;
+    }
+
+    Ok(())
 }

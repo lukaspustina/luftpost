@@ -1,6 +1,6 @@
 use config::Smtp;
 use handlebars::{Handlebars, RenderError, RenderContext, Helper};
-use measurement::Measurement;
+use check::CheckedMeasurement;
 use lettre::email::{Email, EmailBuilder};
 use lettre::transport::EmailTransport;
 use lettre::transport::smtp::{SecurityLevel, SmtpTransport, SmtpTransportBuilder};
@@ -64,8 +64,8 @@ impl<'a> Mailer<'a> {
         Ok(mailer)
     }
 
-    pub fn mail_measurement(&mut self, measurement: &Measurement) -> Result<()> {
-        let (subject, text, html) = create_body(measurement, self.subject,
+    pub fn mail_measurement(&mut self, check_measurement: &CheckedMeasurement) -> Result<()> {
+        let (subject, text, html) = create_body(check_measurement, self.subject,
                                                 self.text_template, self.html_template)?;
         let email = EmailBuilder::new()
             .to(self.to_addr)
@@ -85,13 +85,13 @@ impl<'a> Mailer<'a> {
     }
 }
 
-fn create_body(measurement: &Measurement, subject_template: &str, text_template: &str, html_template: &str) -> Result<(String, String, String)> {
+fn create_body(check_measurement: &CheckedMeasurement, subject_template: &str, text_template: &str, html_template: &str) -> Result<(String, String, String)> {
     let mut handlebars = Handlebars::new();
     handlebars.register_helper("number", Box::new(handlebars_number_formatter));
     handlebars.register_helper("exceeds", Box::new(handlebars_number_comparision));
-    let subject = handlebars.template_render(subject_template, measurement)?;
-    let text = handlebars.template_render(text_template, measurement)?;
-    let html = handlebars.template_render(html_template, measurement)?;
+    let subject = handlebars.template_render(subject_template, check_measurement)?;
+    let text = handlebars.template_render(text_template, check_measurement)?;
+    let html = handlebars.template_render(html_template, check_measurement)?;
 
     Ok((subject, text, html))
 }
@@ -128,7 +128,7 @@ fn handlebars_number_comparision(h: &Helper, _: &Handlebars, rc: &mut RenderCont
 mod test {
     use super::*;
 
-    use measurement::Value;
+    use measurement::{Measurement, Value};
     use lettre::transport::stub::StubEmailTransport;
     use sensor::Sensor;
 
@@ -157,16 +157,21 @@ mod test {
             software_version: "NRZ-2017-089".to_string(),
             data_values: data_values,
         };
+        let check_measurement = CheckedMeasurement {
+            measurement: measurement,
+            has_violations: false,
+            violations: Vec::new(),
+        };
         let mut mailer = Mailer {
             transport: Transport::Stub(Box::new(StubEmailTransport)),
             to_addr: "test@example.com",
             from_addr: "sender@example.com",
-            subject: "Sensor {{ sensor.name }} exceeded thresholds",
+            subject: "Sensor {{ measurement.sensor.name }} exceeded thresholds",
             text_template: "{{ sensor.name }}",
             html_template: "{{ sensor.name }}"
         };
 
-        let res = mailer.mail_measurement(&measurement);
+        let res = mailer.mail_measurement(&check_measurement);
 
         assert!(res.is_ok());
     }
