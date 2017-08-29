@@ -17,7 +17,7 @@ error_chain! {
     }
 }
 
-#[derive(Debug, Serialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 pub enum Value {
     SDS_P1(f32),
@@ -66,7 +66,7 @@ impl fmt::Display for Value {
     }
 }
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Measurement {
     pub sensor: Sensor,
     pub software_version: String,

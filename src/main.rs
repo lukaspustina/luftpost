@@ -109,7 +109,7 @@ fn run() -> Result<i32> {
                         println!("{} because a threshold is back to normal.", cm.measurement.sensor.name);
                     }
                 }
-                mailer.mail_measurement(&cm).map_err(|e| e.into())
+                mailer.mail_measurement(cm).map_err(|e| e.into())
             });
         results.collect::<::std::result::Result<Vec<()>, Error>>()?;
     }
@@ -161,7 +161,7 @@ fn build_cli() -> App<'static, 'static> {
              .help("The shell to generate the script for"))
 }
 
-fn load_sensor_states<P: AsRef<Path>>(sensors: &Vec<Sensor>, state_dir: P) -> Result<HashMap<SensorId, SensorState>> {
+fn load_sensor_states<P: AsRef<Path>>(sensors: &[Sensor], state_dir: P) -> Result<HashMap<SensorId, SensorState>> {
     let mut sensor_states = HashMap::new();
 
     for s in sensors {
@@ -185,12 +185,9 @@ fn read_measurements(core: &mut Core, sensors: Vec<Sensor>) -> Result<Vec<Measur
     core.run(big_f).map_err(|e| e.into())
 }
 
-fn save_sensor_states<P: AsRef<Path>>(checked_measurements: &Vec<CheckedMeasurement>, state_dir: P) -> Result<()> {
+fn save_sensor_states<P: AsRef<Path>>(checked_measurements: &[CheckedMeasurement], state_dir: P) -> Result<()> {
     for cm in checked_measurements {
-        let state = match cm.has_violations {
-            true => AlarmState::ThresholdExceeded,
-            false => AlarmState::Normal,
-        };
+        let state = if cm.has_violations { AlarmState::ThresholdExceeded } else { AlarmState::Normal };
         let sensor_state = SensorState { sensor_id: cm.measurement.sensor.id.clone(), alarm_state: state };
         sensor_state.save(&state_dir)?;
     }

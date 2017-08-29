@@ -1,6 +1,6 @@
 use measurement::{Measurement, Value};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CheckedMeasurement {
     pub measurement: Measurement,
     pub has_violations: bool,
