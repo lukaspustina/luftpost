@@ -17,7 +17,8 @@ error_chain!{
         SmtpTransportError(::lettre::transport::smtp::error::Error);
         StubTransportError(::lettre::transport::stub::error::Error);
         EmailFormatError(::lettre::email::error::Error);
-        TemplateError(::handlebars::TemplateRenderError);
+        TemplateError(::handlebars::TemplateError);
+        RenderError(::handlebars::RenderError);
         IoError(::std::io::Error);
     }
 }
@@ -89,9 +90,12 @@ fn create_body(check_measurement: &CheckedMeasurement, subject_template: &str, t
     let mut handlebars = Handlebars::new();
     handlebars.register_helper("number", Box::new(handlebars_number_formatter));
     handlebars.register_helper("exceeds", Box::new(handlebars_number_comparision));
-    let subject = handlebars.template_render(subject_template, check_measurement)?;
-    let text = handlebars.template_render(text_template, check_measurement)?;
-    let html = handlebars.template_render(html_template, check_measurement)?;
+    handlebars.register_template_string("subject", subject_template)?;
+    handlebars.register_template_string("text_template", text_template)?;
+    handlebars.register_template_string("html_template", html_template)?;
+    let subject = handlebars.render("subject", check_measurement)?;
+    let text = handlebars.render("text_template", check_measurement)?;
+    let html = handlebars.render("html_template", check_measurement)?;
 
     Ok((subject, text, html))
 }
