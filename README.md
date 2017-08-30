@@ -30,7 +30,7 @@ There are binaries for Linux, Raspberry Pi, and Windows as well as Debian packag
 
 ## Configuration
 
-Please see this [example](tests/luftpost.example.conf) for a full description of all available configuration parameters. This [example](test/luftpost-minimal.example.conf) shows the minimal configuration required to run _luftpost_.
+Please see this [example](tests/luftpost.example.conf) for a full description of all available configuration parameters. This [example](tests/luftpost-minimal.example.conf) shows the minimal configuration required to run _luftpost_.
 
 _luftpost_ uses the [Handlebars](https://handlebarsjs.com) templating language provided through [handlebars-rust](https://github.com/sunng87/handlebars-rust). Please mind that handlebars-rust has a few [limitations](https://github.com/sunng87/handlebars-rust#limitations) compared to the original JavaScript Handlebars implementation. Please check the respective documentation if you want to develop your own templates.
 
