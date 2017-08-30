@@ -1,6 +1,6 @@
 [root]
 name = "luftpost"
-version = "0.0.5"
+version = "1.0.0"
 dependencies = [
  "clap 2.26.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0-rc.2 (registry+https://github.com/rust-lang/crates.io-index)",
