@@ -71,7 +71,7 @@ cargo install luftpost
 
 ### Ansible
 
-There is also an Ansible role available at [Ansible Galaxy](https://galaxy.ansible.com/Rheinwerk/luftpost/) that automates the installation of _luftpost_.
+There is also an Ansible role available at [Ansible Galaxy](https://galaxy.ansible.com/lukaspustina/luftpost/) that automates the installation of _luftpost_.
 
 
 ## Future Work
