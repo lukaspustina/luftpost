@@ -32,7 +32,16 @@ error_chain! {
     }
 }
 
-quick_main!(run);
+fn main() {
+    match run() {
+        Ok(res) => ::std::process::exit(res),
+        Err(err) => {
+            use error_chain::ChainedError;
+            eprintln!("{}", err.display_chain());
+            ::std::process::exit(1);
+        }
+    }
+}
 
 fn run() -> Result<i32> {
     let cli_args = build_cli().get_matches();
@@ -60,7 +69,7 @@ fn run() -> Result<i32> {
     let print = cli_args.is_present("print");
 
     let sensor_states = if let Some(ref state_dir) = config.general.state_dir {
-        load_sensor_states(&config.sensors, state_dir).ok()
+        Option::from(load_sensor_states(&config.sensors, state_dir))
     } else {
         None
     };
@@ -161,15 +170,16 @@ fn build_cli() -> App<'static, 'static> {
              .help("The shell to generate the script for"))
 }
 
-fn load_sensor_states<P: AsRef<Path>>(sensors: &[Sensor], state_dir: P) -> Result<HashMap<SensorId, SensorState>> {
+fn load_sensor_states<P: AsRef<Path>>(sensors: &[Sensor], state_dir: P) -> HashMap<SensorId, SensorState> {
     let mut sensor_states = HashMap::new();
 
     for s in sensors {
-        let state = SensorState::load(&s.id, &state_dir)?;
-        sensor_states.insert(s.id.clone(), state);
+        if let Ok(state) = SensorState::load(&s.id, &state_dir) {
+            sensor_states.insert(s.id.clone(), state);
+        }
     }
 
-    Ok(sensor_states)
+    sensor_states
 
 }
 

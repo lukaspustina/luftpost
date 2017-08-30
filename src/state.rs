@@ -6,7 +6,14 @@ use std::path::{Path, PathBuf};
 
 error_chain! {
     errors {
-
+        FailedToLoadState(sensor: String, state_dir: String) {
+            description("failed to load state")
+            display("failed to load state for sensor '{}' from state directory '{}'", sensor, state_dir)
+        }
+        FailedToSaveState(sensor: String, state_dir: String) {
+            description("failed to save state")
+            display("failed to save state of sensor '{}' to state directory '{}'", sensor, state_dir)
+        }
     }
     foreign_links {
         Io(::std::io::Error);
@@ -31,14 +38,13 @@ pub struct SensorState {
 
 impl SensorState {
     pub fn load<P: AsRef<Path>>(sensor_id: &SensorId, state_dir: P) -> Result<SensorState> {
-        let fp = create_filepath(sensor_id, state_dir);
-        load_from_file(fp)
+        let fp = create_filepath(sensor_id, state_dir.as_ref());
+        load_from_file(fp).chain_err(|| ErrorKind::FailedToLoadState(sensor_id.clone(), state_dir.as_ref().to_string_lossy().to_string()))
     }
 
     pub fn save<P: AsRef<Path>>(&self, state_dir: P) -> Result<()> {
-        let fp = create_filepath(&self.sensor_id, state_dir);
-        save_state_to_file(self, fp)
-
+        let fp = create_filepath(&self.sensor_id, state_dir.as_ref());
+        save_state_to_file(self, fp).chain_err(|| ErrorKind::FailedToSaveState(self.sensor_id.clone(), state_dir.as_ref().to_string_lossy().to_string()))
     }
 }
 

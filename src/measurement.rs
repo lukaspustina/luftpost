@@ -5,11 +5,11 @@ error_chain! {
     errors {
         InvalidValueType(type_str: String) {
             description("invalid value type")
-                display("invalid value type: '{}'", type_str)
+            display("invalid value type: '{}'", type_str)
         }
         InvalidValue(value_str: String) {
             description("invalid value")
-                display("invalid value: '{}'", value_str)
+            display("invalid value: '{}'", value_str)
         }
     }
     links {

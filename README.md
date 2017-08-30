@@ -66,11 +66,11 @@ Watches [luftdaten.info](http://luftdaten.info) particulates sensors and sends E
 
     * [X] Alert on changes only
 
-* [ ] Milestone 3
+* [X] Milestone 3
 
     * [X] Register handlebar templates with names
 
-    * [ ] Show full error stack
+    * [X] Show full error stack
 
 [ ] Release 0.1
 
