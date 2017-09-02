@@ -24,6 +24,7 @@ There are binaries for Linux, Raspberry Pi, and Windows as well as Debian packag
   - [macOS](#macos)
   - [Sources](#sources)
   - [Ansible](#ansible)
+- [Postcardware](#postcardware)
 - [Future Work](#future-work)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -73,6 +74,18 @@ cargo install luftpost
 
 There is also an Ansible role available at [Ansible Galaxy](https://galaxy.ansible.com/lukaspustina/luftpost/) that automates the installation of _luftpost_.
 
+
+## Postcardware
+
+You're free to use _luftpost_. If you find it useful, I would highly appreciate you sending me a postcard from your hometown mentioning how you use _luftpost_. My work address is
+
+```
+Lukas Pustina
+CenterDevice GmbH
+Rheinwerkallee 3
+53227 Bonn
+Germany
+```
 
 ## Future Work
 
